@@ -10,9 +10,10 @@ This exercise has been designed to be completed in 2-4 hours. The goal of this e
  - Tests can be written in Go idomatic style or in BDD style. Make sure tests are easy to read
  - Engineers at Form3 generally favor BDD style tests or idomatic Go tests for this kind of task.
  
-- Docker-compose
+#### Docker-compose
+
  - Add your solution to the provided docker-compose file
- - We should be able to `docker-compose up` and see your tests run against the provided account API service 
+ - We should be able to run `docker-compose up` and see your tests run against the provided account API service 
 
  
 ### Please don't
