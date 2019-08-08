@@ -2,10 +2,8 @@ version: '3'
 
 services:
   accountapi:
-    image: form3tech/interview-accountapi:v0.1-13-g0627e5b9
-    links:
-      - postgresql
-      - vault
+    image: form3tech/interview-accountapi:v1.0.0
+    restart: on-failure
     depends_on:
       - postgresql
       - vault
