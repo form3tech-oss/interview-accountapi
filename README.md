@@ -10,8 +10,7 @@ in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organ
 - Implement only `Create`, `Fetch`, `List` only paging not filtering and `Delete` as [documented](http://api-docs.form3.tech/api.html#organisation-accounts)
 - Focus on writing full-stack tests that cover the full range of expected and unexpected use-cases
  - Tests can be written in Go idomatic style or in BDD style. Make sure tests are easy to read
- - Engineers at Form3 generally favor BDD style tests or idomatic Go tests for this kind of task.
-- If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
+ - If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
 before reaching out for help
 
 #### Docker-compose
