@@ -9,7 +9,7 @@ in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organ
 - Client library should be written in Go
 - Implement only `Create`, `Fetch`, `List` only paging not filtering and `Delete` as [documented](http://api-docs.form3.tech/api.html#organisation-accounts)
 - Focus on writing full-stack tests that cover the full range of expected and unexpected use-cases
- - Tests can be written in Go idomatic style or in BDD style. Make sure tests are easy to read
+ - Tests can be written in Go idomatic style or in BDD style. Form3 engineers tend to favour BDD. Make sure tests are easy to read
  - If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
 before reaching out for help
 
