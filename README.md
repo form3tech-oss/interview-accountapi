@@ -25,6 +25,6 @@ before reaching out for help
 
 ## How to submit your exercise
 - Create a private repository, copy the `docker-compose` from this repository
-- Let us know you've completed the exercise using the link provided at the bottom of the email from our recruitment team
+- Once finished, upload the URL of your private repo using the link provided at the bottom of the email from our recruitment team
 - Usernames of the developers reviewing your code will then be provided for you to grant them access to your private repository
 - Put your name in the README
