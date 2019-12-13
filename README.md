@@ -20,7 +20,7 @@ before reaching out for help
  - We should be able to run `docker-compose up` and see your tests run against the provided account API service 
 
 ### Please don't
-- Use a code generator to write the client library
+- Use a code generator to write the client library (like Swagger)
 - Implement an authentication scheme
 
 ## How to submit your exercise
