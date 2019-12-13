@@ -9,9 +9,8 @@ in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organ
 - Client library should be written in Go
 - Document your technical decisions
 - Implement the `Create`, `Fetch`, `List` and `Delete` operations on the `accounts` resource. Note that filtering of the List operation is not required, but you should support paging
-- Focus on writing full-stack tests that cover the full range of expected and unexpected use-cases
- - Tests can be written in Go idiomatic style or in BDD style. Form3 engineers tend to favour BDD. Make sure tests are easy to read
- - If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
+- Ensure your solution is well tested to the level you would expect in a commercial environment. Make sure your tests are easy to read.
+- If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
 before reaching out for help
 
 #### Docker-compose
