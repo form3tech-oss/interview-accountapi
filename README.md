@@ -18,7 +18,7 @@ before reaching out for help
 
 ### Please don't
 - Use a code generator to write the client library
-- Use a library for your client (e.g: gp-resty). Only test libraries are allowed.
+- Use a library for your client (e.g: go-resty). Only test libraries are allowed.
 - Implement an authentication scheme
 
 ## How to submit your exercise
