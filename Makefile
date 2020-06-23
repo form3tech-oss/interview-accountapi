@@ -1,3 +1,3 @@
 .PHONY: docs
 docs:
-	@docker run -v $$PWD/:/docs pandoc/latex -f markdown /docs/README.md -o /docs/build/output/README.pdf
+	docker run -v ${PWD}/:/data pandoc/latex -f markdown README.md -o README.pdf && open README.pdf
