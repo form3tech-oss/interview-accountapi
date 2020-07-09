@@ -9,6 +9,8 @@ in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organ
 - Document your technical decisions
 - Implement the `Create`, `Fetch`, `List` and `Delete` operations on the `accounts` resource. Note that filtering of the List operation is not required, but you should support paging
 - Ensure your solution is well tested to the level you would expect in a commercial environment. Make sure your tests are easy to read.
+- To keep this exercise simple, fields `data.attributes.private_identification`, `data.attributes.organisation_identification` 
+and `data.relationships` were omitted in the provided fake accountapi implementation - do not implement these in your model
 - If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
 before reaching out for help
 
