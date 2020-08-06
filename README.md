@@ -1,7 +1,7 @@
 # Form3 Take Home Exercise
 
 ## Instructions
-This exercise has been designed to be completed in 4-8 hours. The goal of this exercise is to write a client library 
+The goal of this exercise is to write a client library 
 in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organisation-accounts) service. 
 
 ### Should
