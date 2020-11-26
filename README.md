@@ -20,6 +20,7 @@ before reaching out for help
 
 ### Please don't
 - Use a code generator to write the client library
+- Use (copy or otherwise) code from any third party library without attribution to complete the exercise, as this will result in the test being rejected
 - Use a library for your client (e.g: go-resty). Only test libraries are allowed.
 - Implement an authentication scheme
 
