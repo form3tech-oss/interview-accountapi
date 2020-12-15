@@ -20,7 +20,7 @@ before reaching out for help.
 
 ### Please don't
 - Use a code generator to write the client library
-- Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected
+- Use (copy or otherwise) code from any third party **without attribution** to complete the exercise, as this will result in the test being rejected. Using a helper function from a library is fine as long as the dependency is explicit or the source of the code is clearly documented in the repo.
 - Use a library for your client (e.g: go-resty). Only test libraries are allowed.
 - Implement an authentication scheme
 - Implement support for the fields `data.attributes.private_identification`, `data.attributes.organisation_identification`
