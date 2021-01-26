@@ -21,7 +21,7 @@ before reaching out for help.
 ### Please don't
 - Use a code generator to write the client library
 - Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected
-- Use a library for your client (e.g: go-resty). Only test libraries are allowed.
+- Use a library that implements most of the heavy lifting in the client (e.g: go-resty). Only test libraries are allowed and libraries that implement types such as [UUID](https://github.com/google/uuid)
 - Implement an authentication scheme
 - Implement support for the fields `data.attributes.private_identification`, `data.attributes.organisation_identification`
   and `data.relationships`, as they are omitted in the provided fake account API implementation
