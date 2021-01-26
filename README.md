@@ -8,23 +8,30 @@ container in the file `docker-compose.yaml` of this repository. Please refer to 
 If you encounter any problems running the fake account API we would encourage you to do some debugging first,
 before reaching out for help.
 
-### The solution is expected to
-- Be written in Go
-- Contain documentation of your technical decisions
-- Implement the `Create`, `Fetch`, `List` and `Delete` operations on the `accounts` resource. Note that filtering of the List operation is not required, but you should support paging
-- Be well tested to the level you would expect in a commercial environment. Make sure your tests are easy to read.
+## Acceptance Critera
+### Shoulds
+The finished solution **should:**
+- Be written in Go.
+- Be a client library suitable for use in another software project.
+- Implement the `Create`, `Fetch`, and `Delete` operations on the `accounts` resource.
+- Be well tested to the level you would expect in a commercial environment.
+- Contain documentation of your technical decisions.
+- Be simple and concise.
+- Have tests that run from `docker-compose up` - our reviewers will run `docker-compose up` to assess if your tests pass.
 
-#### Docker-compose
- - Add your solution to the provided docker-compose file
- - We should be able to run `docker-compose up` and see your tests run against the provided account API service 
-
-### Please don't
-- Use a code generator to write the client library
-- Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected
-- Use a library for your client (e.g: go-resty). Only test libraries are allowed.
-- Implement an authentication scheme
+### Should Nots
+The finished solution **should not:**
+- Use a code generator to write the client library.
+- Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected.
+- Use a library for your client (e.g: go-resty). Only test or non-client libraries are allowed (e.g. for UUID types).
+- Implement an authentication scheme.
 - Implement support for the fields `data.attributes.private_identification`, `data.attributes.organisation_identification`
-  and `data.relationships`, as they are omitted in the provided fake account API implementation
+  and `data.relationships`, as they are omitted in the provided fake account API implementation.
+- Have advanced features, like retries, metrics or tracing.
+- Be a command line client or other type of program - the requirement is to write a client library.
+- Implement the `List` operation.
+
+> We give no credit for including any of the above in a submitted test, so please only focus on the "Shoulds" above.
   
 ## How to submit your exercise
 - Include your name in the README. If you are new to Go, please also mention this in the README so that we can consider this when reviewing your exercise
