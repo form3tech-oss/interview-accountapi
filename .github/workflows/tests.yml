@@ -3,8 +3,17 @@ name: tests
 on: [push]
 
 jobs:
+  unit_test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run unit tests
+        run: go test ./...
   linting:
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v2
-        - uses: golangci/golangci-lint-action@v2
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run linting
+        uses: golangci/golangci-lint-action@v2
