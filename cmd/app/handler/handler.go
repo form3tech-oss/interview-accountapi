@@ -17,17 +17,17 @@ type AccountsHandler interface {
 	Fetch(accountID string) (account.Account, error)
 }
 
-type Data struct {
+type data struct {
 	Body account.Account `json:"data"`
 }
 
-type Form3AccountsHandler struct {
+type form3AccountsHandler struct {
 	url    string
 	client http.Client
 }
 
-func (handler Form3AccountsHandler) Create(a account.Account) (account.Account, error) {
-	jsonData, jsonErr := json.Marshal(&Data{a})
+func (handler form3AccountsHandler) Create(a account.Account) (account.Account, error) {
+	jsonData, jsonErr := json.Marshal(&data{a})
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 		return account.Account{}, jsonErr
@@ -47,7 +47,7 @@ func (handler Form3AccountsHandler) Create(a account.Account) (account.Account, 
 	return createdAccount, nil
 }
 
-func (handler Form3AccountsHandler) Delete(accountID string) (bool, error) {
+func (handler form3AccountsHandler) Delete(accountID string) (bool, error) {
 	deleteAccountRequest, reqErr := http.NewRequest("DELETE", handler.url+accountID+"?version=0", nil)
 	if reqErr != nil {
 		log.Fatal(reqErr)
@@ -66,7 +66,7 @@ func (handler Form3AccountsHandler) Delete(accountID string) (bool, error) {
 	return deleteAccountResponse.StatusCode == 204, nil
 }
 
-func (handler Form3AccountsHandler) Fetch(accountID string) (account.Account, error) {
+func (handler form3AccountsHandler) Fetch(accountID string) (account.Account, error) {
 
 	fetchedAccountResponse, fetchErr := handler.client.Get(handler.url + accountID)
 	if fetchErr != nil {
@@ -76,7 +76,7 @@ func (handler Form3AccountsHandler) Fetch(accountID string) (account.Account, er
 
 	defer fetchedAccountResponse.Body.Close()
 
-	fetchedAccount := new(Data)
+	fetchedAccount := data{}
 
 	json.NewDecoder(fetchedAccountResponse.Body).Decode(&fetchedAccount)
 
@@ -88,5 +88,5 @@ func (handler Form3AccountsHandler) Fetch(accountID string) (account.Account, er
 }
 
 func Handler(url string) AccountsHandler {
-	return Form3AccountsHandler{url, http.Client{Timeout: 10 * time.Second}}
+	return form3AccountsHandler{url, http.Client{Timeout: 10 * time.Second}}
 }
