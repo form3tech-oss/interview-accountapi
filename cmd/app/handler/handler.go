@@ -40,10 +40,10 @@ func (handler form3AccountsHandler) Create(a account.Account) (account.Account, 
 
 	defer createAccountResponse.Body.Close()
 
-	createdAccount := account.Account{}
+	createdAccount := data{}
 	json.NewDecoder(createAccountResponse.Body).Decode(&createdAccount)
 
-	return createdAccount, nil
+	return createdAccount.Body, nil
 }
 
 func (handler form3AccountsHandler) Delete(accountID string) (bool, error) {

@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"testing"
 	"time"
 
 	"github.com/advena/interview-accountapi/cmd/app/account"
 	"github.com/advena/interview-accountapi/cmd/app/handler"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
 )
 
-func main() {
+func TestCreateFetchDeleteAccount(t *testing.T) {
 	url := "http://localhost:8080/v1/organisation/accounts/"
 	client := http.Client{Timeout: 10 * time.Second}
 
@@ -35,20 +37,30 @@ func main() {
 	}
 
 	//save account
-	accountHandler.Create(newAccount)
+	createdAccount, err := accountHandler.Create(newAccount)
+	validate(err)
 
 	//get account
-	accountHandler.Fetch(newAccount.ID)
+	fetchedAccount, err := accountHandler.Fetch(newAccount.ID)
+	validate(err)
+
+	assert.True(t, createdAccount.ID == fetchedAccount.ID)
 
 	//delete account
-	accountHandler.Delete(newAccount.ID)
+	wasDeleted, err := accountHandler.Delete(newAccount.ID)
+	validate(err)
 
 	//validate created account is deleted
 	exists, err := accountHandler.Fetch(newAccount.ID)
-	if err != nil {
-		fmt.Printf(err.Error())
+	assert.NotNil(t, err)
+	assert.Equal(t, exists.ID, "")
+
+	assert.True(t, wasDeleted)
+
+}
+
+func validate(error error) {
+	if error != nil {
+		fmt.Printf("Error: %s \n", error.Error())
 	}
-
-	fmt.Printf(exists.ID)
-
 }

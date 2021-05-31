@@ -61,7 +61,7 @@ func TestCreateAccount(t *testing.T) {
 
 	//then
 	assert.NoError(t, err)
-	assert.IsType(t, createdAccount, account.Account{})
+	assert.Equal(t, createdAccount.ID, validAccountID)
 }
 
 func TestDeleteAccount(t *testing.T) {
