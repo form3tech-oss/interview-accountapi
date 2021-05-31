@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/advena/interview-accountapi/cmd/app/account"
 )
@@ -78,15 +77,18 @@ func (handler form3AccountsHandler) Fetch(accountID string) (account.Account, er
 
 	fetchedAccount := data{}
 
-	json.NewDecoder(fetchedAccountResponse.Body).Decode(&fetchedAccount)
-
 	if fetchedAccountResponse.StatusCode != 200 {
 		return account.Account{}, errors.New("not existing account for " + accountID)
+	}
+
+	decodeErr := json.NewDecoder(fetchedAccountResponse.Body).Decode(&fetchedAccount)
+	if decodeErr != nil {
+		return account.Account{}, decodeErr
 	}
 
 	return fetchedAccount.Body, nil
 }
 
-func Handler(url string) AccountsHandler {
-	return form3AccountsHandler{url, http.Client{Timeout: 10 * time.Second}}
+func Handler(client http.Client, url string) AccountsHandler {
+	return form3AccountsHandler{url, client}
 }

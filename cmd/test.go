@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/advena/interview-accountapi/cmd/app/account"
 	"github.com/advena/interview-accountapi/cmd/app/handler"
@@ -9,11 +11,12 @@ import (
 )
 
 func main() {
-	//url
 	url := "http://localhost:8080/v1/organisation/accounts/"
+	client := http.Client{Timeout: 10 * time.Second}
 
 	//create handler
-	accountHandler := handler.Handler(url)
+
+	accountHandler := handler.Handler(client, url)
 
 	//create Account data
 	newAccount := account.Account{
