@@ -13,7 +13,7 @@ import (
 )
 
 func TestCreateFetchDeleteAccount(t *testing.T) {
-	url := "http://localhost:8080/v1/organisation/accounts/"
+	url := "http://accountapi:8080/v1/organisation/accounts/"
 	client := http.Client{Timeout: 10 * time.Second}
 
 	//create handler

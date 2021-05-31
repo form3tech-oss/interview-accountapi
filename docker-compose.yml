@@ -35,6 +35,17 @@ services:
     volumes:
       - ./scripts/db:/docker-entrypoint-initdb.d/
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - accountapi
+    volumes:
+      - ./:/app
+    environment: 
+      - HOST=http://accountapi:8080
+
   vault:
     image: vault:0.9.3
     environment:
