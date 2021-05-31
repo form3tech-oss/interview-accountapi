@@ -1,5 +1,11 @@
 package account
 
+type AccountsHandler interface {
+	Create(account Account) (Account, error)
+	Delete(accountID string) (bool, error)
+	Fetch(accountID string) (Account, error)
+}
+
 type Account struct {
 	ID             string     `json:"id"`
 	OrganisationID string     `json:"organisation_id"`

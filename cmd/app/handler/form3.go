@@ -10,12 +10,6 @@ import (
 	"github.com/advena/interview-accountapi/cmd/app/account"
 )
 
-type AccountsHandler interface {
-	Create(account account.Account) (account.Account, error)
-	Delete(accountID string) (bool, error)
-	Fetch(accountID string) (account.Account, error)
-}
-
 type data struct {
 	Body account.Account `json:"data"`
 }
@@ -89,6 +83,6 @@ func (handler form3AccountsHandler) Fetch(accountID string) (account.Account, er
 	return fetchedAccount.Body, nil
 }
 
-func Handler(client http.Client, url string) AccountsHandler {
+func Handler(client http.Client, url string) account.AccountsHandler {
 	return form3AccountsHandler{url, client}
 }
