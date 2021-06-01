@@ -49,7 +49,7 @@ func validateBankIDLength(country string, bankID string, result *ValidationResul
 	}
 }
 
-func BankIDValidator() (validator AccountValidator) {
+func BankIDValidator() (validator Validator) {
 	return bankIDValidator{}
 }
 
@@ -77,6 +77,18 @@ func validateBIC(country string, BIC string, result *ValidationResult) {
 	}
 }
 
-func BICValidator() (validator AccountValidator) {
+func BICValidator() (validator Validator) {
 	return bicValidator{}
+}
+
+type AccountValidator struct {
+	Validators []Validator
+}
+
+func (a AccountValidator) Validate(account Account) ValidationResult {
+	result := ValidationResult{}
+	for _, validator := range a.Validators {
+		result.concat(validator.Validate(account))
+	}
+	return result
 }

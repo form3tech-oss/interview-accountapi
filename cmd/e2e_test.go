@@ -15,10 +15,12 @@ import (
 func TestCreateFetchDeleteAccount(t *testing.T) {
 	url := "http://accountapi:8080/v1/organisation/accounts/"
 	client := http.Client{Timeout: 10 * time.Second}
+	validators := []account.Validator{account.BankIDValidator(), account.BICValidator()}
+	accountRepository := handler.Handler(client, url)
+	accountValidator := account.AccountValidator{Validators: validators}
 
 	//create handler
-
-	accountHandler := handler.Handler(client, url)
+	accountHandler := account.AccountsHandler{Repository: accountRepository, Validator: accountValidator}
 
 	//create Account data
 	newAccount := account.Account{
@@ -56,6 +58,14 @@ func TestCreateFetchDeleteAccount(t *testing.T) {
 	assert.Equal(t, exists.ID, "")
 
 	assert.True(t, wasDeleted)
+
+	//invalid account is not created
+	invalidAccount := account.Account{}
+	invalidAccount.Attributes.Country = "GB"
+
+	_, err = accountHandler.Create(invalidAccount)
+
+	assert.NotNil(t, err)
 
 }
 

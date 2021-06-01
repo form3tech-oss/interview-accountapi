@@ -67,3 +67,25 @@ func TestValidatesAccountWithGivenCountryAndBankID(t *testing.T) {
 	}
 
 }
+
+func TestValidatesAccountWithAllRequiredFiledsValid(t *testing.T) {
+	account := Account{}
+	account.Attributes.BankID = "222222"
+	account.Attributes.Country = "GB"
+	account.Attributes.BIC = "NWBKGB22"
+
+	result := AccountValidator{[]Validator{BankIDValidator(), BICValidator()}}.Validate(account)
+
+	assert.True(t, result.IsValid())
+}
+
+func TestValidatesAccountWithAllRequiredFieldsInvalid(t *testing.T) {
+	account := Account{}
+	account.Attributes.BankID = "22222"
+	account.Attributes.Country = "GB"
+	account.Attributes.BIC = ""
+
+	result := AccountValidator{[]Validator{BankIDValidator(), BICValidator()}}.Validate(account)
+
+	assert.False(t, result.IsValid())
+}
