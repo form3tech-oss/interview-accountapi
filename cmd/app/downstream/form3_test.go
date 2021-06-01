@@ -1,4 +1,4 @@
-package handler
+package downstream
 
 import (
 	"net/http"
@@ -37,10 +37,10 @@ func TestFetchAccount(t *testing.T) {
 	httpmock.ActivateNonDefault(&client)
 	httpmock.RegisterResponder("GET", url+validAccountID, httpmock.NewStringResponder(200, validRespone()))
 
-	handler := Handler(client, url)
+	repository := Form3RestRespository(client, url)
 
 	//when
-	account, err := handler.Fetch(validAccountID)
+	account, err := repository.Fetch(validAccountID)
 
 	//then
 	assert.NoError(t, err)
@@ -54,10 +54,10 @@ func TestCreateAccount(t *testing.T) {
 	httpmock.ActivateNonDefault(&client)
 	httpmock.RegisterResponder("POST", url, httpmock.NewStringResponder(200, validRespone()))
 
-	handler := Handler(client, url)
+	repository := Form3RestRespository(client, url)
 
 	//when
-	createdAccount, err := handler.Create(Account())
+	createdAccount, err := repository.Create(Account())
 
 	//then
 	assert.NoError(t, err)
@@ -70,12 +70,12 @@ func TestDeleteAccount(t *testing.T) {
 
 	httpmock.ActivateNonDefault(&client)
 
-	handler := Handler(client, url)
+	repository := Form3RestRespository(client, url)
 
 	httpmock.RegisterResponder("DELETE", url+validAccountID+"?version=0", httpmock.NewStringResponder(204, ""))
 
 	//when
-	account, err := handler.Delete(validAccountID)
+	account, err := repository.Delete(validAccountID)
 
 	//then
 	assert.NoError(t, err)

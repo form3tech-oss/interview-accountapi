@@ -2,25 +2,19 @@ package app
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
-	"time"
 
 	"github.com/advena/interview-accountapi/cmd/app/account"
-	"github.com/advena/interview-accountapi/cmd/app/handler"
+	"github.com/advena/interview-accountapi/cmd/app/account/handler"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateFetchDeleteAccount(t *testing.T) {
 	url := "http://accountapi:8080/v1/organisation/accounts/"
-	client := http.Client{Timeout: 10 * time.Second}
-	validators := []account.Validator{account.BankIDValidator(), account.BICValidator()}
-	accountRepository := handler.Handler(client, url)
-	accountValidator := account.AccountValidator{Validators: validators}
 
 	//create handler
-	accountHandler := account.AccountsHandler{Repository: accountRepository, Validator: accountValidator}
+	accountHandler := handler.NewForm3AccountHandler(url)
 
 	//create Account data
 	newAccount := account.Account{

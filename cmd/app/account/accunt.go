@@ -1,33 +1,9 @@
 package account
 
-import "errors"
-
 type AccountsRepository interface {
 	Create(account Account) (Account, error)
 	Delete(accountID string) (bool, error)
 	Fetch(accountID string) (Account, error)
-}
-
-type AccountsHandler struct {
-	Repository AccountsRepository
-	Validator  Validator
-}
-
-func (a *AccountsHandler) Create(account Account) (Account, error) {
-	validationResult := a.Validator.Validate(account)
-	if validationResult.IsValid() {
-		return a.Repository.Create(account)
-	} else {
-		return Account{}, errors.New(validationResult.message())
-	}
-}
-
-func (a *AccountsHandler) Delete(accountID string) (bool, error) {
-	return a.Repository.Delete(accountID)
-}
-
-func (a *AccountsHandler) Fetch(accountID string) (Account, error) {
-	return a.Repository.Fetch(accountID)
 }
 
 type Account struct {

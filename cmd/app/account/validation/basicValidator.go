@@ -1,9 +1,11 @@
-package account
+package validation
+
+import "github.com/advena/interview-accountapi/cmd/app/account"
 
 type bankIDValidator struct {
 }
 
-func (c bankIDValidator) Validate(account Account) (result ValidationResult) {
+func (c bankIDValidator) Validate(account account.Account) (result ValidationResult) {
 	validationResult := ValidationResult{}
 	country := account.Attributes.Country
 
@@ -56,7 +58,7 @@ func BankIDValidator() (validator Validator) {
 type bicValidator struct {
 }
 
-func (b bicValidator) Validate(account Account) ValidationResult {
+func (b bicValidator) Validate(account account.Account) ValidationResult {
 	validationResult := ValidationResult{}
 	country := account.Attributes.Country
 
@@ -85,7 +87,7 @@ type AccountValidator struct {
 	Validators []Validator
 }
 
-func (a AccountValidator) Validate(account Account) ValidationResult {
+func (a AccountValidator) Validate(account account.Account) ValidationResult {
 	result := ValidationResult{}
 	for _, validator := range a.Validators {
 		result.concat(validator.Validate(account))

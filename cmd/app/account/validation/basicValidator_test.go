@@ -1,8 +1,9 @@
-package account
+package validation
 
 import (
 	"testing"
 
+	"github.com/advena/interview-accountapi/cmd/app/account"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func TestValidatesAccountWithGivenCountryAndBIC(t *testing.T) {
 
 	for _, tt := range params {
 		t.Run(tt.country, func(t *testing.T) {
-			account := Account{}
+			account := account.Account{}
 			account.Attributes.BIC = tt.bic
 			account.Attributes.Country = tt.country
 			result := BICValidator().Validate(account)
@@ -58,7 +59,7 @@ func TestValidatesAccountWithGivenCountryAndBankID(t *testing.T) {
 
 	for _, tt := range params {
 		t.Run(tt.country, func(t *testing.T) {
-			account := Account{}
+			account := account.Account{}
 			account.Attributes.BankID = tt.bankID
 			account.Attributes.Country = tt.country
 			result := BankIDValidator().Validate(account)
@@ -69,7 +70,7 @@ func TestValidatesAccountWithGivenCountryAndBankID(t *testing.T) {
 }
 
 func TestValidatesAccountWithAllRequiredFiledsValid(t *testing.T) {
-	account := Account{}
+	account := account.Account{}
 	account.Attributes.BankID = "222222"
 	account.Attributes.Country = "GB"
 	account.Attributes.BIC = "NWBKGB22"
@@ -80,7 +81,7 @@ func TestValidatesAccountWithAllRequiredFiledsValid(t *testing.T) {
 }
 
 func TestValidatesAccountWithAllRequiredFieldsInvalid(t *testing.T) {
-	account := Account{}
+	account := account.Account{}
 	account.Attributes.BankID = "22222"
 	account.Attributes.Country = "GB"
 	account.Attributes.BIC = ""

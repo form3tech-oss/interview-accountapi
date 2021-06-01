@@ -1,4 +1,4 @@
-package handler
+package downstream
 
 import (
 	"bytes"
@@ -83,6 +83,6 @@ func (handler form3AccountsHandler) Fetch(accountID string) (account.Account, er
 	return fetchedAccount.Body, nil
 }
 
-func Handler(client http.Client, url string) account.AccountsRepository {
+func Form3RestRespository(client http.Client, url string) account.AccountsRepository {
 	return form3AccountsHandler{url, client}
 }

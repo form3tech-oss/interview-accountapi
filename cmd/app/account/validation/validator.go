@@ -1,9 +1,13 @@
-package account
+package validation
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/advena/interview-accountapi/cmd/app/account"
+)
 
 type Validator interface {
-	Validate(account Account) (result ValidationResult)
+	Validate(account account.Account) (result ValidationResult)
 }
 
 type ValidationResult struct {
@@ -23,6 +27,6 @@ func (r *ValidationResult) concat(other ValidationResult) (output ValidationResu
 	return *r
 }
 
-func (r ValidationResult) message() (message string) {
+func (r ValidationResult) Message() (message string) {
 	return strings.Join(r.errorMessages[:], ", ")
 }
