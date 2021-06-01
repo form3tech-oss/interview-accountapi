@@ -1,3 +1,20 @@
+Mateusz Gepert new to golang.
+
+ - started task with narrowing down how to make http call with root lib from go (found that `net/http` and `encoding/json` will do the job). Since I was completetly new I started doing all in one big main function (not so bit around 150 lines TBH :))
+ - decided to do simple split of application to separate model and actual implemetation (keeping in mind that actual API is an implementation detail also I introduced the level of abstraction for form3 accounts resources) - added also unit tests. I used here native testing lib and also one for assert and another one to mock the rest http calls to mimic API as close as possible. Unit tests are simple and covers only the happy path scenario (as an improvement I would recommend to make that tests more deep handle different error codes, malformed response bodies etc.)
+ - at this time I found minimum scenario covered so I've enriched the docker-compose file and provided basic Dockerfile. I've prepared basic end to end test to check if all good with connection etc. (that might be tested with `docker-compose up --build`)
+ - since I've seen in API swagger documentation that there are some validation done decided to prepare simple validation framework and implemented two validations one for BankID second one for BIC with relation to country field in account (that also might be improved but the validation logic and validator is present only new validators needs to be added and injected to AccountValidator which is a kind of a proxy for all Validators). To be able to use that validator I needed to create a simple decorator for `AccountRespository` that will trigger validation before delegating request to actual API (I found better to check that before making http request)
+  - at the end I've decided to restructure the whole app and provide simple `handler` file with above decorator - it might be treated as and entrypoint and factory method for the whole lib
+
+ Cut corners:
+  - I decided to add limited amount of tests (just to get the idea how it works and how to extend that in future)
+  - `Account` model is shared as contract to library and also as entry point to API (ideally it might be decoupled but for such small project I don't find it necessary). Also in real production ready env I would provide the simple fluent builder for account to be able to create them easily (possible driven by the actual account type and limitations based on country)
+  - package structure I'm not fully familiar with go package management (I'm java origin and it was quite hard for me to understand how to best split the funcionality accros the lib) Ideally I would like to have abstracted entry point with clear definition of contract and provide simple factories to create dedicated client of library. Partialy it can be achived with `handler.NewForm3AccountHandler` which wraps and hides all implementation details only what need to be passed is url (which probably might be better abstracted)
+
+ 
+
+
+
 # Form3 Take Home Exercise
 
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
