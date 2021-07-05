@@ -7,6 +7,8 @@ The goal of this exercise is to write a client library in Go to access our fake 
 container in the file `docker-compose.yaml` of this repository. Please refer to the
 [Form3 documentation](http://api-docs.form3.tech/api.html#organisation-accounts) for information on how to interact with the API. Please note that the fake account API does not require any authorisation or authentication.
 
+A mapping of account attributes can be found in [models.go](./models.go).
+
 If you encounter any problems running the fake account API we would encourage you to do some debugging first,
 before reaching out for help.
 
