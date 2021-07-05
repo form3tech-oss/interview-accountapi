@@ -21,7 +21,6 @@ The finished solution **should:**
 - Be a client library suitable for use in another software project.
 - Implement the `Create`, `Fetch`, and `Delete` operations on the `accounts` resource.
 - Be well tested to the level you would expect in a commercial environment. Note that tests are expected to run against the provided fake account API.
-- Contain documentation of your technical decisions.
 - Be simple and concise.
 - Have tests that run from `docker-compose up` - our reviewers will run `docker-compose up` to assess if your tests pass.
 
