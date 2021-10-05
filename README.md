@@ -2,6 +2,16 @@
 
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
 
+## Candidate Information
+
+- Name: Alejandro Omar Rizzuto
+- Usual programming languages: Java, Kotlin, ANSI C, C++, MySQL, PL-SQL, Linux scripting, Python (basic)
+
+### Working with Go
+
+I have never worked with Golang, this was my first time. I used html library to perform the requested task.
+I'm not familiar with Go style which is why it took me some time to understand packages structure. I tried to use same structure I usually create on my dailies projects but I do not know if in Go is ok to do it like this.
+
 ## Instructions
 The goal of this exercise is to write a client library in Go to access our fake account API, which is provided as a Docker
 container in the file `docker-compose.yaml` of this repository. Please refer to the
