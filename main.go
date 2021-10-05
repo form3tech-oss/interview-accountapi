@@ -2,24 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"./src/processes/accountProcess"
 	"./src/processes/healthProcess"
 )
 
 func main() {
-	fmt.Println("\nGetting Health information:")
 	healthProcess.GetHealth()
 
-	fmt.Println("\nPosting an Account:")
 	accountProcess.PostAccount(GetAccountToPost())
 
-	fmt.Println("\nGetting Accounts:")
 	accountProcess.GetAccounts()
 
 	id := "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc"
-	fmt.Println("\nRemoving account number: " + id)
 	accountProcess.DeleteAccount(id)
 }
 

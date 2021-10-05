@@ -1,7 +1,12 @@
 package healthProcess
 
-import "../../../src/endpoint"
+import (
+	"fmt"
+
+	"../../../src/endpoint"
+)
 
 func GetHealth() {
+	fmt.Println("\nGetting Health information:")
 	endpoint.GetHealth()
 }
