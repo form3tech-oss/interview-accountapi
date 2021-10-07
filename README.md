@@ -18,6 +18,7 @@ before reaching out for help.
 
 The finished solution **should:**
 - Be written in Go.
+- Use the `docker-compose.yaml` of this repository.
 - Be a client library suitable for use in another software project.
 - Implement the `Create`, `Fetch`, and `Delete` operations on the `accounts` resource.
 - Be well tested to the level you would expect in a commercial environment. Note that tests are expected to run against the provided fake account API.
