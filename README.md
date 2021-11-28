@@ -3,6 +3,7 @@
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
 
 ## Instructions
+
 The goal of this exercise is to write a client library in Go to access our fake account API, which is provided as a Docker
 container in the file `docker-compose.yaml` of this repository. Please refer to the
 [Form3 documentation](http://api-docs.form3.tech/api.html#organisation-accounts) for information on how to interact with the API. Please note that the fake account API does not require any authorisation or authentication.
@@ -23,7 +24,7 @@ The finished solution **should:**
 - Implement the `Create`, `Fetch`, and `Delete` operations on the `accounts` resource.
 - Be well tested to the level you would expect in a commercial environment. Note that tests are expected to run against the provided fake account API.
 - Be simple and concise.
-- Have tests that run from `docker-compose up` - our reviewers will run `docker-compose up` to assess if your tests pass.
+- Have tests that run from `docker compose up` - our reviewers will run `docker compose up` to assess if your tests pass.
 
 ### Should Nots
 
