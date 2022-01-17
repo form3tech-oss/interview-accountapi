@@ -30,7 +30,7 @@ The finished solution **should:**
 The finished solution **should not:**
 - Use a code generator to write the client library.
 - Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected.
-- Use a library for your client (e.g: go-resty). Libraries to support testing or types like UUID are fine.
+- Use a library for your client (e.g: go-resty). Anything from the standard library (such as `net/http`) is allowed. Libraries to support testing or types like UUID are also fine.
 - Implement client-side validation.
 - Implement an authentication scheme.
 - Implement support for the fields `data.attributes.private_identification`, `data.attributes.organisation_identification`
