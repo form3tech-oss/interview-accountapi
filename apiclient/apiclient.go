@@ -34,19 +34,21 @@ func CreateClient(baseUrl string) Client {
 func sendRequest(method string, endpoint string, requestBody string) ([]byte, int) {
 	request, e := http.NewRequest(method, apiAddress+endpoint, bytes.NewBuffer([]byte(requestBody)))
 	if e != nil {
-		log.Fatal(e.Error())
+		log.Print(e.Error())
+		return nil, 400
 	}
 
 	httpclient := &http.Client{}
 	response, e := httpclient.Do(request)
 	if e != nil {
-		log.Fatal(e.Error())
+		log.Printf("error calling remote address: '%s'", e.Error())
+		return nil, 503
 	}
 
 	defer response.Body.Close()
 	responsecontent, e := ioutil.ReadAll(response.Body)
 	if e != nil {
-		log.Fatal(e.Error())
+		log.Printf("error reading http response: '%s'", e.Error())
 	}
 	return responsecontent, response.StatusCode
 }
@@ -61,7 +63,7 @@ func (ApiClientV1) CreateAccount(account accountapiclient.AccountData) (accounta
 		AccountData: account,
 	})
 	if e != nil {
-		log.Fatal(e.Error())
+		log.Print(e.Error())
 		return accountapiclient.AccountData{}, []string{"invalid input structure"}
 	}
 
