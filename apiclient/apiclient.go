@@ -89,8 +89,7 @@ func (ApiClientV1) CreateAccount(account accountapiclient.AccountData) (accounta
 
 func (ApiClientV1) FetchAccount(accountId string) (accountapiclient.AccountData, []string) {
 	var account accountapiclient.Account
-	id, e := uuid.Parse(accountId)
-	if e != nil || id == uuid.Nil {
+	if !isValidUUID(accountId) {
 		return accountapiclient.AccountData{}, []string{"invalid account id"}
 	}
 
@@ -107,8 +106,7 @@ func (ApiClientV1) FetchAccount(accountId string) (accountapiclient.AccountData,
 }
 
 func (ApiClientV1) DeleteAccount(accountId string) []string {
-	id, e := uuid.Parse(accountId)
-	if id == uuid.Nil || e != nil {
+	if !isValidUUID(accountId) {
 		return []string{"invalid account id"}
 	}
 
@@ -121,4 +119,12 @@ func (ApiClientV1) DeleteAccount(accountId string) []string {
 		return []string{"account cannot be found"}
 	}
 	return []string{"something went wrong, try again"}
+}
+
+func isValidUUID(accountId string) bool {
+	id, e := uuid.Parse(accountId)
+	if id == uuid.Nil || e != nil {
+		return false
+	}
+	return true
 }
