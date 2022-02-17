@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
-	client := CreateClient("http://localhost:8080")
+	client := CreateClient("http://accountapi:8080")
 
 	country := "CA"
 	version := int64(1)
