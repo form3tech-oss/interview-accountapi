@@ -8,8 +8,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const host = "http://accountapi:8080"
+
 func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
-	client := CreateClient("http://localhost:8080")
+	client := CreateClient(host)
 
 	country := "CA"
 	version := int64(1)
@@ -37,7 +39,7 @@ func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
 }
 
 func TestCreateAccount_ReturnsError_WhenApiIsDown(t *testing.T) {
-	client := CreateClient("http://myhost:8080")
+	client := CreateClient("http://localhost:9292")
 	country := "CA"
 	version := int64(1)
 	_, e := client.CreateAccount(accountapiclient.AccountData{
@@ -52,6 +54,6 @@ func TestCreateAccount_ReturnsError_WhenApiIsDown(t *testing.T) {
 	})
 
 	if len(e) <= 0 {
-		t.Fatalf("expected remote host error, received '%s'", fmt.Sprint(e))
+		t.Errorf("expected remote host error, received '%s'", fmt.Sprint(e))
 	}
 }
