@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 var CurrnetVersion string
@@ -15,7 +17,7 @@ var apiAddress string
 
 type Client interface {
 	CreateAccount(account accountapiclient.AccountData) (accountapiclient.AccountData, []string)
-	//FetchAccount(accountId string) (accountapiclient.AccountData, []string)
+	FetchAccount(accountId string) (accountapiclient.AccountData, []string)
 	//DeleteAccount(accountId string) []string
 }
 
@@ -83,4 +85,23 @@ func (ApiClientV1) CreateAccount(account accountapiclient.AccountData) (accounta
 		return accountapiclient.AccountData{}, errors
 	}
 	return account, nil
+}
+
+func (ApiClientV1) FetchAccount(accountId string) (accountapiclient.AccountData, []string) {
+	var account accountapiclient.Account
+	id, e := uuid.Parse(accountId)
+	if e != nil || id == uuid.Nil {
+		return accountapiclient.AccountData{}, []string{"invalid account id"}
+	}
+
+	responsebody, statuscode := sendRequest("GET", "/organisation/accounts/"+accountId, "")
+	if statuscode >= 200 && statuscode <= 299 {
+		json.NewDecoder(bytes.NewBuffer(responsebody)).Decode(&account)
+	} else {
+		var apiError accountapiclient.ApiErrors
+		json.NewDecoder(bytes.NewBuffer(responsebody)).Decode(&apiError)
+		return accountapiclient.AccountData{}, strings.Split(apiError.ErrorMessage, "\n")
+	}
+
+	return account.AccountData, nil
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
-	client := CreateClient("http://accountapi:8080")
+	client := CreateClient("http://localhost:8080")
 
 	country := "CA"
 	version := int64(1)
@@ -27,6 +27,13 @@ func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
 	if (account == accountapiclient.AccountData{}) {
 		t.Fatalf("expected valid account type, received '%s'", fmt.Sprint(account))
 	}
+
+	t.Run("TestFetchAccount", func(t *testing.T) {
+		foundAccount, e := client.FetchAccount(account.ID)
+		if (len(e) > 0 || foundAccount == accountapiclient.AccountData{}) {
+			t.Fatalf("expected account with no errors, recieved '%s'", fmt.Sprint(len(e)))
+		}
+	})
 }
 
 func TestCreateAccount_ReturnsError_WhenApiIsDown(t *testing.T) {
