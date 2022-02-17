@@ -27,12 +27,12 @@ func CreateClient(baseUrl string) Client {
 		baseUrl = baseUrl + "/"
 	}
 
-	apiAddress = baseUrl
+	apiAddress = baseUrl + CurrnetVersion
 	return ApiClientV1{}
 }
 
 func sendRequest(method string, endpoint string, requestBody string) ([]byte, int) {
-	request, e := http.NewRequest(method, apiAddress, bytes.NewBuffer([]byte(requestBody)))
+	request, e := http.NewRequest(method, apiAddress+endpoint, bytes.NewBuffer([]byte(requestBody)))
 	if e != nil {
 		log.Fatal(e.Error())
 	}
@@ -57,7 +57,9 @@ func (ApiClientV1) CreateAccount(account accountapiclient.AccountData) (accounta
 	}
 
 	var errors []string
-	requestbody, e := json.Marshal(account)
+	requestbody, e := json.Marshal(accountapiclient.Account{
+		AccountData: account,
+	})
 	if e != nil {
 		log.Fatal(e.Error())
 		return accountapiclient.AccountData{}, []string{"invalid input structure"}

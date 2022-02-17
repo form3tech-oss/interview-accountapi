@@ -29,8 +29,8 @@ type AccountAttributes struct {
 	Switched                *bool    `json:"switched,omitempty"`
 }
 
-type AccountApiResponse struct {
-	Account AccountData `json:"data"`
+type Account struct {
+	AccountData AccountData `json:"data"`
 }
 
 type ApiErrors struct {
