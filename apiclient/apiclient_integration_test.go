@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const host = "http://accountapi:8080"
+const host = "http://accountapi:8080/"
 
 func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
 	client := CreateClient(host)
@@ -35,6 +35,18 @@ func TestCreateAccount_ReturnsCreatedAccount(t *testing.T) {
 		if (len(e) > 0 || foundAccount == accountapiclient.AccountData{}) {
 			t.Fatalf("expected account with no errors, recieved '%s'", fmt.Sprint(len(e)))
 		}
+
+		t.Run("TestDeleteAccount", func(t *testing.T) {
+			e := client.DeleteAccount(account.ID)
+			if len(e) > 0 {
+				t.Fatalf("expected no errors, received '%s'", fmt.Sprint(len(e)))
+			}
+
+			a, e := client.FetchAccount(account.ID)
+			if (len(e) == 0 || a != accountapiclient.AccountData{}) {
+				t.Fatalf("did not expect to find account '%s', supposed to be deleted", fmt.Sprint(account.ID))
+			}
+		})
 	})
 }
 

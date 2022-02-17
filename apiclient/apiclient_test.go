@@ -250,3 +250,59 @@ func TestFetchAccount_ReturnsAccount_WhenAccountIsFound(t *testing.T) {
 		t.Errorf("expected Account with ID: '%s', received account with ID: '%s'", expectedAccountId, account.ID)
 	}
 }
+
+func TestDeleteAccount_ReturnsAnError_WhenAccountIsInvalid(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(404)
+		rw.Write([]byte(""))
+	}))
+	defer server.Close()
+
+	client := CreateClient(server.URL)
+	e := client.DeleteAccount("")
+	if len(e) == 0 {
+		t.Errorf("expected an error, received 0")
+	}
+}
+
+func TestDeleteAccount_ReturnsAnError_WhenAccountIsNotFound(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(404)
+		rw.Write([]byte(""))
+	}))
+	defer server.Close()
+
+	client := CreateClient(server.URL)
+	e := client.DeleteAccount("49dac5ee-6ffb-4bb3-a24d-9c36d4f4ca36")
+	if len(e) == 0 {
+		t.Errorf("expected an error, received 0")
+	}
+}
+
+func TestDeleteAccount_ReturnsAnError_WhenDeleteRequestFails(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(500)
+		rw.Write([]byte(""))
+	}))
+	defer server.Close()
+
+	client := CreateClient(server.URL)
+	e := client.DeleteAccount("49dac5ee-6ffb-4bb3-a24d-9c36d4f4ca36")
+	if len(e) == 0 {
+		t.Errorf("expected an error, received 0")
+	}
+}
+
+func TestDeleteAccount_ReturnsNoError_WhenAccountDeletedSuccessfully(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(204)
+		rw.Write([]byte(""))
+	}))
+	defer server.Close()
+
+	client := CreateClient(server.URL)
+	e := client.DeleteAccount("49dac5ee-6ffb-4bb3-a24d-9c36d4f4ca36")
+	if len(e) > 0 {
+		t.Errorf("expected no errors, received '%s'", fmt.Sprint(len(e)))
+	}
+}

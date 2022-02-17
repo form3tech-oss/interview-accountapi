@@ -18,7 +18,7 @@ var apiAddress string
 type Client interface {
 	CreateAccount(account accountapiclient.AccountData) (accountapiclient.AccountData, []string)
 	FetchAccount(accountId string) (accountapiclient.AccountData, []string)
-	//DeleteAccount(accountId string) []string
+	DeleteAccount(accountId string) []string
 }
 
 type ApiClientV1 struct{}
@@ -104,4 +104,21 @@ func (ApiClientV1) FetchAccount(accountId string) (accountapiclient.AccountData,
 	}
 
 	return account.AccountData, nil
+}
+
+func (ApiClientV1) DeleteAccount(accountId string) []string {
+	id, e := uuid.Parse(accountId)
+	if id == uuid.Nil || e != nil {
+		return []string{"invalid account id"}
+	}
+
+	_, statuscode := sendRequest("DELETE", "/organisation/accounts/"+accountId+"?version=0", "")
+	if statuscode == 204 {
+		return nil
+	}
+
+	if statuscode == 404 {
+		return []string{"account cannot be found"}
+	}
+	return []string{"something went wrong, try again"}
 }
