@@ -108,7 +108,7 @@ func TestCreateAccount_ReturnsCreatedAccount_WhenCreationIsSuccessful(t *testing
 	}
 
 	if account.Attributes.Name[0] != "Malek" {
-		t.Fatalf("expected account with name 'Malek', received '%s'", *&account.Attributes.Name[0])
+		t.Fatalf("expected account with name 'Malek', received '%s'", account.Attributes.Name[0])
 	}
 }
 
