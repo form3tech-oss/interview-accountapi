@@ -14,7 +14,11 @@ func TestCreateAccount_ReturnsOneError_WhenInputIsEmpty(t *testing.T) {
 	client := CreateClient("http://localhost:8080")
 	_, errors := client.CreateAccount(accountapiclient.AccountData{})
 	if len(errors) != 1 {
-		t.Fatalf("expected one error, received '%s'", fmt.Sprint(len(errors)))
+		t.Errorf("expected one error, received '%s'", fmt.Sprint(len(errors)))
+	}
+
+	if errors[0] != "invalid input" {
+		t.Errorf("expected invalid input error, received '%s'", errors[0])
 	}
 }
 
@@ -102,6 +106,10 @@ func TestCreateAccount_ReturnsCreatedAccount_WhenCreationIsSuccessful(t *testing
 	if (account == accountapiclient.AccountData{}) {
 		t.Fatalf("expected account with data, received '%s'", fmt.Sprint(account))
 	}
+
+	if account.Attributes.Name[0] != "Malek" {
+		t.Fatalf("expected account with name 'Malek', received '%s'", *&account.Attributes.Name[0])
+	}
 }
 
 func TestCreateAccount_ReturnsValidationErrors_WhenCreationFails(t *testing.T) {
@@ -126,7 +134,11 @@ func TestCreateAccount_ReturnsValidationErrors_WhenCreationFails(t *testing.T) {
 	})
 
 	if len(errors) < 2 {
-		t.Errorf("expected two errors, received '%s'", fmt.Sprint(len(errors)))
+		t.Errorf("expected more than one error, received '%s'", fmt.Sprint(len(errors)))
+	}
+
+	if errors[3] != "country in body should match '^[A-Z]{2}$'" {
+		t.Errorf("expected 'country in body should match '^[A-Z]{2}$'' error, received '%s'", errors[0])
 	}
 }
 
@@ -152,21 +164,33 @@ func TestCreateAccount_ReturnsOneError_WhenCreationCrashes(t *testing.T) {
 	if len(errors) != 1 {
 		t.Errorf("expected one error, received '%s'", fmt.Sprint(len(errors)))
 	}
+
+	if errors[0] != "somethign went wrong, try again" {
+		t.Errorf("expected 'somethign went wrong, try again' error, received '%s'", errors[0])
+	}
 }
 
 func TestFetchAccount_ReturnsError_WhenAccountIdIsInvalid(t *testing.T) {
 	client := CreateClient("http://localhost:8080")
 	_, errors := client.FetchAccount("")
-	if len(errors) <= 0 {
+	if len(errors) != 1 {
 		t.Errorf("expected an error, received, '%s'", fmt.Sprint(len(errors)))
+	}
+
+	if errors[0] != "invalid account id" {
+		t.Errorf("expected 'invalid account id' error, received, '%s'", errors[0])
 	}
 }
 
 func TestFetchAccount_ReturnsError_WhenAccountIdIsEmpty(t *testing.T) {
 	client := CreateClient("http://localhost:8080")
 	_, errors := client.FetchAccount("00000000-0000-0000-0000-000000000000")
-	if len(errors) <= 0 {
+	if len(errors) != 1 {
 		t.Errorf("expected an error, received, '%s'", fmt.Sprint(len(errors)))
+	}
+
+	if errors[0] != "invalid account id" {
+		t.Errorf("expected 'invalid account id' error, received, '%s'", errors[0])
 	}
 }
 
@@ -263,6 +287,10 @@ func TestDeleteAccount_ReturnsAnError_WhenAccountIsInvalid(t *testing.T) {
 	if len(e) == 0 {
 		t.Errorf("expected an error, received 0")
 	}
+
+	if e[0] != "invalid account id" {
+		t.Errorf("expected 'invalid account id' error, : '%s'", e[0])
+	}
 }
 
 func TestDeleteAccount_ReturnsAnError_WhenAccountIsNotFound(t *testing.T) {
@@ -277,6 +305,10 @@ func TestDeleteAccount_ReturnsAnError_WhenAccountIsNotFound(t *testing.T) {
 	if len(e) == 0 {
 		t.Errorf("expected an error, received 0")
 	}
+
+	if e[0] != "account cannot be found" {
+		t.Errorf("expected 'account cannot be found' error, received %s", e[0])
+	}
 }
 
 func TestDeleteAccount_ReturnsAnError_WhenDeleteRequestFails(t *testing.T) {
@@ -290,6 +322,10 @@ func TestDeleteAccount_ReturnsAnError_WhenDeleteRequestFails(t *testing.T) {
 	e := client.DeleteAccount("49dac5ee-6ffb-4bb3-a24d-9c36d4f4ca36")
 	if len(e) == 0 {
 		t.Errorf("expected an error, received 0")
+	}
+
+	if e[0] != "something went wrong, try again" {
+		t.Errorf("expected 'something went wrong, try again' error, received %s", e[0])
 	}
 }
 
