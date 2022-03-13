@@ -44,7 +44,7 @@ The finished solution **should not:**
 
 - Include your name in the README. If you are new to Go, please also mention this in the README so that we can consider this when reviewing your exercise
 - Create a private [GitHub](https://help.github.com/en/articles/create-a-repo) repository, by copying all files you deem necessary for your submission
-- [Invite](https://help.github.com/en/articles/inviting-collaborators-to-a-personal-repository) **_form3tech-interviewer-1_** to your private repo
+- [Invite](https://help.github.com/en/articles/inviting-collaborators-to-a-personal-repository) [@form3tech-interviewer-1](https://github.com/form3tech-interviewer-1) to your private repo
 - Let us know you've completed the exercise using the link provided at the bottom of the email from our recruitment team
 
 ## License
