@@ -2,7 +2,7 @@ version: '3'
 
 services:
   accountapi:
-    image: form3tech/interview-accountapi:v1.0.0-50-ga251d4fc
+    image: form3tech/interview-accountapi:v1.0.0-46-gb3b6c766
     restart: on-failure
     depends_on:
       - postgresql
