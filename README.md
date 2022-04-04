@@ -30,6 +30,7 @@ The finished solution **should:**
 The finished solution **should not:**
 - Use a code generator to write the client library.
 - Use (copy or otherwise) code from any third party without attribution to complete the exercise, as this will result in the test being rejected.
+    - **We will fail tests that plagiarise others' work. This includes (but is not limited to) other past submissions or open-source libraries.**
 - Use a library for your client (e.g: go-resty). Anything from the standard library (such as `net/http`) is allowed. Libraries to support testing or types like UUID are also fine.
 - Implement client-side validation.
 - Implement an authentication scheme.
