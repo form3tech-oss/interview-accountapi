@@ -1,0 +1,10 @@
+FROM golang:1.18
+
+WORKDIR /usr/src/app
+
+# caching go.mod / go.sum to avoid to download them if they do not change
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+ENTRYPOINT ["go","test","-v"]

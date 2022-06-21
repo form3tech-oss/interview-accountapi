@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   accountapi:
@@ -24,7 +24,7 @@ services:
   postgresql:
     image: postgres:9.5-alpine
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root"]
       timeout: 45s
       interval: 10s
       retries: 10
@@ -40,3 +40,11 @@ services:
     environment:
       - SKIP_SETCAP=1
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
+
+  # client:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.test
+  #   restart: on-failure
+  #   depends_on:
+  #     - accountapi
