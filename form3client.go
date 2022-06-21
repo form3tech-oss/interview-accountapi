@@ -5,82 +5,110 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
-type AccountData struct {
-	Attributes     *AccountAttributes `json:"attributes,omitempty"`
-	ID             string             `json:"id,omitempty"`
-	OrganisationID string             `json:"organisation_id,omitempty"`
-	Type           string             `json:"type,omitempty"`
-	Version        *int64             `json:"version,omitempty"`
-	CreatedOn      string             `json:"created_on,omitempty"`
-	ModifiedOn     string             `json:"modified_on,omitempty"`
-}
-
-type AccountAttributes struct {
-	AccountClassification   *string  `json:"account_classification,omitempty"`
-	AccountMatchingOptOut   *bool    `json:"account_matching_opt_out,omitempty"`
-	AccountNumber           string   `json:"account_number,omitempty"`
-	AlternativeNames        []string `json:"alternative_names,omitempty"`
-	BankID                  string   `json:"bank_id,omitempty"`
-	BankIDCode              string   `json:"bank_id_code,omitempty"`
-	BaseCurrency            string   `json:"base_currency,omitempty"`
-	Bic                     string   `json:"bic,omitempty"`
-	Country                 *string  `json:"country,omitempty"`
-	Iban                    string   `json:"iban,omitempty"`
-	JointAccount            *bool    `json:"joint_account,omitempty"`
-	Name                    []string `json:"name,omitempty"`
-	SecondaryIdentification string   `json:"secondary_identification,omitempty"`
-	Status                  *string  `json:"status,omitempty"`
-	Switched                *bool    `json:"switched,omitempty"`
-}
-
-var ErrNoAccountData error = errors.New("no data provided to create an account")
+var ErrNoAccountData error = errors.New("expected JSON string not provided")
 var ErrParsingResponse error = errors.New("unable to parse JSON response")
+
+type ClientResponse struct {
+	StatusCode int
+	Body       string
+}
 
 func ClientError(err error) error {
 	return fmt.Errorf("client error: %v", err)
 }
 
-// Create creates a new account
-func CreateAccount(jsonAccountData string) (string, error) {
+// Create client
+func Client() *http.Client {
+	return &http.Client{}
+}
+
+func ParseResponse(resp *http.Response, okCode int) (ClientResponse, error) {
+	// Read Response Body
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
+
+	// We return the response
+	bodyString := string(bodyBytes)
+	if resp.StatusCode != okCode {
+		apiError := errors.New(bodyString)
+		errorString := fmt.Errorf("API error: %v; %w", resp.StatusCode, apiError)
+		return ClientResponse{resp.StatusCode, bodyString}, errorString
+	} else {
+		return ClientResponse{resp.StatusCode, bodyString}, nil
+	}
+}
+
+func DeletionRequest(url string) (ClientResponse, error) {
+	client := Client()
+
+	// Create request
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
+
+	// Fetch Request
+	resp, err := client.Do(req)
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	return ParseResponse(resp, http.StatusNoContent)
+}
+
+func FetchRequest(url string) (ClientResponse, error) {
+	client := Client()
+
+	// Create request
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("Content-Type", "application/vnd.api+json")
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
+
+	// Fetch Request
+	resp, err := client.Do(req)
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
+	defer resp.Body.Close()
+
+	// Parse the response
+	return ParseResponse(resp, http.StatusNoContent)
+}
+
+func PostRequest(url string, jsonAccountData string) (ClientResponse, error) {
+	client := Client()
 
 	// If no accountData was given, return an error with a message.
 	if jsonAccountData == "" {
-		return "", ClientError(ErrNoAccountData)
+		return ClientResponse{}, ClientError(ErrNoAccountData)
 	}
 
 	// we parse the req to send it
 	jsonData := []byte(jsonAccountData)
 
-	// We post the request
-	resp, err := http.Post("http://localhost:8080/v1/organisation/accounts", "application/vnd.api+json", bytes.NewBuffer(jsonData))
+	// Create request
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req.Header.Set("Content-Type", "application/vnd.api+json")
 	if err != nil {
-		return "", ClientError(err)
+		return ClientResponse{}, ClientError(err)
 	}
 
-	// if we return => we close the response
+	// Fetch Request
+	resp, err := client.Do(req)
+	if err != nil {
+		return ClientResponse{}, ClientError(err)
+	}
 	defer resp.Body.Close()
 
-	log.Println(resp)
-	// we read the response
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", ClientError(err)
-	}
-
-	// we return the response
-	if resp.StatusCode != http.StatusCreated {
-		return "", fmt.Errorf("API error: %v; %w", resp.StatusCode, errors.New(string(bodyBytes)))
-	} else {
-		return string(bodyBytes), nil
-	}
-
-}
-
-// Delete an existing account
-func DeleteAccount(accountID, version string) (string, error) {
-	return "", nil
+	// Parse the response
+	return ParseResponse(resp, http.StatusCreated)
 }
