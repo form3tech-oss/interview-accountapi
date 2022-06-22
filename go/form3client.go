@@ -6,10 +6,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
 
 var ErrNoAccountData error = errors.New("expected JSON string not provided")
 var ErrParsingResponse error = errors.New("unable to parse JSON response")
+
+const DefaultBaseUrl string = "http://localhost:8080"
+
+// Get baseUrl
+func GetBaseUrl() string {
+	url := os.Getenv("ACCOUNT_API_BASE_URL")
+	if len(url) == 0 {
+		return DefaultBaseUrl
+	}
+	return url
+}
 
 type ClientResponse struct {
 	StatusCode int
@@ -81,7 +93,7 @@ func FetchRequest(url string) (ClientResponse, error) {
 	defer resp.Body.Close()
 
 	// Parse the response
-	return ParseResponse(resp, http.StatusNoContent)
+	return ParseResponse(resp, http.StatusOK)
 }
 
 func PostRequest(url string, jsonAccountData string) (ClientResponse, error) {

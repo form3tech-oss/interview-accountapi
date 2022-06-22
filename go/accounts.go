@@ -1,9 +1,5 @@
 package form3client
 
-import (
-	"os"
-)
-
 // type form3Response struct {
 // 	Data          *AccountData `json:"data,omitempty"`
 // 	Relationships interface{}  `json:"relationships,omitempty"`
@@ -37,21 +33,11 @@ type AccountAttributes struct {
 	Switched                *bool    `json:"switched,omitempty"`
 }
 
-const DefaultBaseUrl string = "http://localhost:8080"
 const AccountsEndpoint string = "/v1/organisation/accounts"
-
-// Get baseUrl
-func getBaseUrl() string {
-	url := os.Getenv("ACCOUNT_API_BASE_URL")
-	if len(url) == 0 {
-		return DefaultBaseUrl
-	}
-	return url
-}
 
 // Get FullAccountUrl
 func getFullAccountUrl() string {
-	return getBaseUrl() + AccountsEndpoint + "/"
+	return GetBaseUrl() + AccountsEndpoint + "/"
 }
 
 // Create creates a new account

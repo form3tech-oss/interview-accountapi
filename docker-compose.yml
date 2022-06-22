@@ -21,6 +21,7 @@ services:
       - DATABASE-PASSWORD=123
     ports:
       - 8080:8080
+
   postgresql:
     image: postgres:9.5-alpine
     healthcheck:
@@ -41,10 +42,12 @@ services:
       - SKIP_SETCAP=1
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
 
-  # client:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.test
-  #   restart: on-failure
-  #   depends_on:
-  #     - accountapi
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      - accountapi
+    environment:
+      - ACCOUNT_API_BASE_URL=http://accountapi:8080
+    pull_policy: build
