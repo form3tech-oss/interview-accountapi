@@ -10,7 +10,7 @@ container in the file `docker-compose.yaml` of this repository. Please refer to 
 A mapping of account attributes can be found in [models.go](./models.go). Can be used as a starting point, usage of the file is not required.
 
 If you encounter any problems running the fake account API we would encourage you to do some debugging first,
-before reaching out for help.
+before reaching out for help. Most candidates implement a successful solution without extra help.
 
 ## Submission Guidance
 
