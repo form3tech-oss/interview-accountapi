@@ -35,7 +35,7 @@ The finished solution **should not:**
 - Implement client-side validation.
 - Implement an authentication scheme.
 - Implement support for the fields `data.attributes.private_identification`, `data.attributes.organisation_identification`
-  and `data.relationships`, as they are omitted in the provided fake account API implementation.
+  and `data.relationships` or any other fields that are not included in the provided `models.go`, as they are omitted from the provided fake account API implementation.
 - Have advanced features, however discussion of anything extra you'd expect a production client to contain would be useful in the documentation.
 - Be a command line client or other type of program - the requirement is to write a client library.
 - Implement the `List` operation.
