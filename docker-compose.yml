@@ -42,7 +42,11 @@ services:
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
   test: 
     environment: 
-      - "SERVER_HOST=http://accountapi:8080"
+      - SERVER_HOST=http://accountapi:8080
+      - DATABASE-HOST=postgresql
+      - DATABASE-SSL-MODE=disable
+      - DATABASE-USERNAME=interview_accountapi_user
+      - DATABASE-PASSWORD=123
     image: golang:bullseye
     working_dir: /app
     depends_on: 
