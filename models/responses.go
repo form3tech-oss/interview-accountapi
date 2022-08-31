@@ -17,9 +17,7 @@ type Account struct {
 	Type           string
 	Version        int
 	OrganisationId string `json:"organisation_id,omitempty"`
-	//Attributes     *AccountAttributes `json:"attributes,omitempty"`
-	//CreatedOn      string
-	//ModifiedOn     string
+	Attributes     *AccountAttributes
 }
 
 type Links struct {
