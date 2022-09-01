@@ -12,6 +12,7 @@ const SERVER = "http://localhost:8080"
 func GetAccounts(bodyResponse *models.AccountBodyResponse) error {
 	const getPath = "/v1/organisation/accounts/"
 	requestURL := fmt.Sprintf("%s%s", SERVER, getPath)
+
 	//decodeError := utils.GetDecodedRequest(requestURL, &bodyResponse)
 	decodeError := utils.GetUnmarshalledJson(requestURL, &bodyResponse)
 
@@ -28,4 +29,12 @@ func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountData,
 	requestURL := fmt.Sprintf("%s%s", SERVER, postPath)
 	response, errorResponse := utils.EvaluatePostAccountResponse(utils.PostAccountRequest(requestURL, bodyRequest))
 	return response, errorResponse
+}
+
+func DeleteAccount(accountId string, accountVersion int) *models.ErrorResponse {
+	var deletePath = fmt.Sprintf("/v1/organisation/accounts/%s?version=%d", accountId, accountVersion)
+	requestURL := fmt.Sprintf("%s%s", SERVER, deletePath)
+
+	response := utils.EvaluateDeleteAccountResponse(utils.DeleteAccountRequest(requestURL))
+	return response
 }

@@ -3,6 +3,8 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/jsebasct/account-api-lib/models"
 	"io"
 	"net/http"
@@ -10,6 +12,7 @@ import (
 )
 
 const HTTP_STATUS_CODE_CREATED = 201
+const HTTP_STATUS_CODE_NO_CONTENT = 204
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
@@ -62,6 +65,7 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 		ShowError("PostAccountRequest", postError)
 		return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: postError.Error()}
 	}
+
 	defer responsePost.Body.Close()
 
 	if responsePost.StatusCode != HTTP_STATUS_CODE_CREATED {
@@ -84,4 +88,33 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 	var accountResponse models.AccountData
 	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
 	return &accountResponse, &models.ErrorResponse{Code: responsePost.StatusCode, Message: decodeError.Error()}
+}
+
+func DeleteAccountRequest(url string) (responseDelete *http.Response, err error) {
+
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	responseDelete, err = myClient.Do(req)
+	return responseDelete, err
+}
+
+func EvaluateDeleteAccountResponse(responseDelete *http.Response, deleteError error) *models.ErrorResponse {
+	if deleteError != nil {
+		ShowError("EvaluateDeleteAccountResponse", deleteError)
+		return &models.ErrorResponse{Message: deleteError.Error()}
+	}
+
+	defer responseDelete.Body.Close()
+
+	if responseDelete.StatusCode != HTTP_STATUS_CODE_NO_CONTENT {
+		statusCodeError := errors.New(fmt.Sprintf("Status Code %d different than %d", responseDelete.StatusCode, HTTP_STATUS_CODE_NO_CONTENT))
+		ShowError("EvaluateDeleteAccountResponse", statusCodeError)
+		return &models.ErrorResponse{Message: statusCodeError.Error()}
+	}
+
+	return nil
 }

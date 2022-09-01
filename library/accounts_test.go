@@ -67,7 +67,7 @@ func TestCreateAccountSuccess(t *testing.T) {
 		t.Errorf("expected greater or equal to 1 received: %d", len(accountsResponse.Data))
 	}
 
-	// filter
+	// check id
 	sameIds := 0
 	for _, acc := range accountsResponse.Data {
 		if acc.Id == accountRequest.Data.Id {
@@ -76,5 +76,14 @@ func TestCreateAccountSuccess(t *testing.T) {
 	}
 	if sameIds != 1 {
 		t.Errorf("expected equal to 1, but received: %d", sameIds)
+	}
+}
+
+func TestDeleteAccount(t *testing.T) {
+	accountId := "ad27e265-9605-4b4b-a0e5-3003ea9cc4dd"
+	accountVersion := 0
+	deleteError := library.DeleteAccount(accountId, accountVersion)
+	if deleteError != nil {
+		t.Errorf("Account: %s with version: %d, can't be deleted", accountId, accountVersion)
 	}
 }
