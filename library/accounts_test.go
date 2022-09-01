@@ -2,6 +2,7 @@ package library_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jsebasct/account-api-lib/library"
 	"github.com/jsebasct/account-api-lib/models"
@@ -52,7 +53,7 @@ func TestCreateAccountSuccess(t *testing.T) {
 	// make actual request
 	createResponse, createError := library.CreateAccount(&accountRequest)
 	if createError != nil {
-		t.Error(createError.Error())
+		t.Error(errors.New(createError.Message))
 	}
 	fmt.Printf("%+v\n", createResponse)
 

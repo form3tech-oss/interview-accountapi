@@ -3,12 +3,13 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"github.com/jsebasct/account-api-lib/models"
 	"io"
 	"net/http"
 	"time"
 )
+
+const HTTP_STATUS_CODE_CREATED = 201
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
@@ -43,9 +44,7 @@ func GetUnmarshalledJson(url string, target interface{}) error {
 	return res
 }
 
-func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (*models.AccountData, error) {
-	//requestBodyBytes := new(bytes.Buffer)
-	//json.NewEncoder(requestBodyBytes).Encode(&bodyRequest)
+func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (resp *http.Response, err error) {
 	jsonData, marshallErr := json.Marshal(bodyRequest)
 
 	if marshallErr != nil {
@@ -54,35 +53,35 @@ func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (*mo
 	}
 
 	responsePost, postError := myClient.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	return responsePost, postError
+}
+
+func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (*models.AccountData, *models.ErrorResponse) {
 
 	if postError != nil {
 		ShowError("PostAccountRequest", postError)
-		return nil, postError
+		return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: postError.Error()}
 	}
 	defer responsePost.Body.Close()
 
-	if responsePost.StatusCode != 201 {
-
-		//extracted
+	if responsePost.StatusCode != HTTP_STATUS_CODE_CREATED {
 		bodyErrorByte, readError := io.ReadAll(responsePost.Body)
 		if readError != nil {
 			ShowError("PostAccountRequest while reading ERROR", readError)
-			return nil, readError
+			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: readError.Error()}
 		}
 
 		errorMessage := models.ErrorResponse{}
 		err := json.Unmarshal(bodyErrorByte, &errorMessage)
 		if err != nil {
-			ShowError("PostAccountRequest while marshalling", err)
-			return nil, err
+			ShowError("PostAccountRequest while unmarshalling", err)
+			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: err.Error()}
 		} else {
-			//fmt.Printf("%+v\n", errorMessage)
-			return nil, errors.New(errorMessage.Message)
+			return nil, &errorMessage
 		}
-		//
 	}
 
 	var accountResponse models.AccountData
 	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
-	return &accountResponse, decodeError
+	return &accountResponse, &models.ErrorResponse{Code: responsePost.StatusCode, Message: decodeError.Error()}
 }

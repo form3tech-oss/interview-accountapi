@@ -23,15 +23,9 @@ func GetAccounts(bodyResponse *models.AccountBodyResponse) error {
 	return nil
 }
 
-func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountData, error) {
+func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountData, *models.ErrorResponse) {
 	const postPath = "/v1/organisation/accounts/"
 	requestURL := fmt.Sprintf("%s%s", SERVER, postPath)
-	response, decodeError := utils.PostAccountRequest(requestURL, bodyRequest)
-
-	if decodeError != nil {
-		utils.ShowError("CreateAccount", decodeError)
-		return nil, errors.New(fmt.Sprintf("Can't do a Post to %s ", requestURL))
-	}
-
-	return response, nil
+	response, errorResponse := utils.EvaluatePostAccountResponse(utils.PostAccountRequest(requestURL, bodyRequest))
+	return response, errorResponse
 }
