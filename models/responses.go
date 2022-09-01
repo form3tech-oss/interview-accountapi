@@ -31,6 +31,10 @@ type AccountBodyResponse struct {
 	Links Links
 }
 
+type AccountBodyRequest struct {
+	Data Account
+}
+
 type AccountAttributes struct {
 	AccountClassification   *string  `json:"account_classification,omitempty"`
 	AccountMatchingOptOut   *bool    `json:"account_matching_opt_out,omitempty"`
@@ -47,4 +51,14 @@ type AccountAttributes struct {
 	SecondaryIdentification string   `json:"secondary_identification,omitempty"`
 	Status                  *string  `json:"status,omitempty"`
 	Switched                *bool    `json:"switched,omitempty"`
+}
+
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"error_message"`
+}
+
+type successResponse struct {
+	Code int         `json:"code"`
+	Data interface{} `json:"data"`
 }

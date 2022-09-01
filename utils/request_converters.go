@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
+	"github.com/jsebasct/account-api-lib/models"
 	"io"
-	"log"
 	"net/http"
 	"time"
 )
@@ -24,26 +25,64 @@ func GetDecodedRequest(url string, target interface{}) error {
 }
 
 func GetUnmarshalledJson(url string, target interface{}) error {
-	//r, err := http.Get(url)
-	r, err := myClient.Get(url)
-	if err != nil {
-		fmt.Println("HUbo un error al hacer el GET")
-		return err
+
+	response, getError := myClient.Get(url)
+	if getError != nil {
+		ShowError("GetUnmarshalledJson", getError)
+		return getError
 	}
-	defer r.Body.Close()
+	defer response.Body.Close()
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("HUbo un error al Lllevarlo a cadena")
-		log.Fatalln(err)
+	bodyByte, readError := io.ReadAll(response.Body)
+	if readError != nil {
+		ShowError("GetUnmarshalledJson while reading", readError)
+		return readError
 	}
 
-	//Convert the body to type string
-	bodyAsString := string(body)
-	fmt.Println("bodyAsString", bodyAsString)
-
-	//var bodyAsStruct AccountBodyResponse
-	res := json.Unmarshal([]byte(bodyAsString), target)
-
+	res := json.Unmarshal(bodyByte, target)
 	return res
+}
+
+func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (*models.AccountData, error) {
+	//requestBodyBytes := new(bytes.Buffer)
+	//json.NewEncoder(requestBodyBytes).Encode(&bodyRequest)
+	jsonData, marshallErr := json.Marshal(bodyRequest)
+
+	if marshallErr != nil {
+		ShowError("PostAccountRequest while reading", marshallErr)
+		return nil, marshallErr
+	}
+
+	responsePost, postError := myClient.Post(url, "application/json", bytes.NewBuffer(jsonData))
+
+	if postError != nil {
+		ShowError("PostAccountRequest", postError)
+		return nil, postError
+	}
+	defer responsePost.Body.Close()
+
+	if responsePost.StatusCode != 201 {
+
+		//extracted
+		bodyErrorByte, readError := io.ReadAll(responsePost.Body)
+		if readError != nil {
+			ShowError("PostAccountRequest while reading ERROR", readError)
+			return nil, readError
+		}
+
+		errorMessage := models.ErrorResponse{}
+		err := json.Unmarshal(bodyErrorByte, &errorMessage)
+		if err != nil {
+			ShowError("PostAccountRequest while marshalling", err)
+			return nil, err
+		} else {
+			//fmt.Printf("%+v\n", errorMessage)
+			return nil, errors.New(errorMessage.Message)
+		}
+		//
+	}
+
+	var accountResponse models.AccountData
+	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
+	return &accountResponse, decodeError
 }
