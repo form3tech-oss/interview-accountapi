@@ -10,8 +10,8 @@ import (
 func main() {
 	fmt.Println("---- Start ----")
 
-	bodyResponse := models.AccountBodyResponse{}
-	err := library.GetAccounts(&bodyResponse)
+	bodyResponse := models.AccountListResponse{}
+	err := library.ListAccounts(&bodyResponse)
 
 	if err != nil {
 		utils.ShowError("Error trying to get account", err)

@@ -9,19 +9,35 @@ import (
 
 const SERVER = "http://localhost:8080"
 
-func GetAccounts(bodyResponse *models.AccountBodyResponse) error {
-	const getPath = "/v1/organisation/accounts/"
-	requestURL := fmt.Sprintf("%s%s", SERVER, getPath)
+func ListAccounts(bodyResponse *models.AccountListResponse) error {
+	const listPath = "/v1/organisation/accounts/"
+	requestURL := fmt.Sprintf("%s%s", SERVER, listPath)
 
 	//decodeError := utils.GetDecodedRequest(requestURL, &bodyResponse)
 	decodeError := utils.GetUnmarshalledJson(requestURL, &bodyResponse)
 
 	if decodeError != nil {
-		utils.ShowError("GetAccounts", decodeError)
+		utils.ShowError("ListAccounts", decodeError)
 		return errors.New(fmt.Sprintf("Can't retrieve %s resource", requestURL))
 	}
 
 	return nil
+}
+
+func FetchAccount(accountId string) (*models.AccountBodyResponse, *models.ErrorResponse) {
+
+	fetchPath := fmt.Sprintf("/v1/organisation/accounts/%s", accountId)
+	requestURL := fmt.Sprintf("%s%s", SERVER, fetchPath)
+
+	account := models.AccountBodyResponse{}
+	decodeError := utils.GetUnmarshalledJson(requestURL, &account)
+
+	if decodeError != nil {
+		//utils.ShowError("FetchAccount", decodeError)
+		return nil, &models.ErrorResponse{Message: decodeError.Error()}
+	}
+
+	return &account, nil
 }
 
 func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountData, *models.ErrorResponse) {

@@ -10,10 +10,24 @@ import (
 	"testing"
 )
 
+func TestFetchAccount(t *testing.T) {
+	const accountId = "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc"
+	account, err := library.FetchAccount(accountId)
+
+	if err != nil {
+		t.Error(errors.New(err.Message))
+	}
+
+	if account.Data.Id != accountId {
+		t.Error(errors.New("account does not have same id"))
+	}
+	fmt.Println(account)
+}
+
 // after one insertion
-func TestGetAccounts(t *testing.T) {
-	bodyResponse := models.AccountBodyResponse{}
-	err := library.GetAccounts(&bodyResponse)
+func TestListAccounts(t *testing.T) {
+	bodyResponse := models.AccountListResponse{}
+	err := library.ListAccounts(&bodyResponse)
 	if err != nil {
 		t.Error(err.Error())
 	} else {
@@ -58,8 +72,8 @@ func TestCreateAccountSuccess(t *testing.T) {
 	fmt.Printf("%+v\n", createResponse)
 
 	// test
-	accountsResponse := models.AccountBodyResponse{}
-	err = library.GetAccounts(&accountsResponse)
+	accountsResponse := models.AccountListResponse{}
+	err = library.ListAccounts(&accountsResponse)
 	if err != nil {
 		t.Error(err.Error())
 	}

@@ -26,12 +26,16 @@ type Links struct {
 	Self  string
 }
 
-type AccountBodyResponse struct {
+type AccountListResponse struct {
 	Data  []Account
 	Links Links
 }
 
 type AccountBodyRequest struct {
+	Data Account
+}
+
+type AccountBodyResponse struct {
 	Data Account
 }
 

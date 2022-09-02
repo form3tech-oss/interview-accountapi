@@ -11,9 +11,6 @@ import (
 	"time"
 )
 
-const HTTP_STATUS_CODE_CREATED = 201
-const HTTP_STATUS_CODE_NO_CONTENT = 204
-
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
 func GetDecodedRequest(url string, target interface{}) error {
@@ -36,6 +33,12 @@ func GetUnmarshalledJson(url string, target interface{}) error {
 		return getError
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err := errors.New(fmt.Sprintf("Expected 200 but got %d", response.StatusCode))
+		ShowError("GetUnmarshalledJson", err)
+		return err
+	}
 
 	bodyByte, readError := io.ReadAll(response.Body)
 	if readError != nil {
@@ -68,7 +71,7 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 
 	defer responsePost.Body.Close()
 
-	if responsePost.StatusCode != HTTP_STATUS_CODE_CREATED {
+	if responsePost.StatusCode != http.StatusCreated {
 		bodyErrorByte, readError := io.ReadAll(responsePost.Body)
 		if readError != nil {
 			ShowError("PostAccountRequest while reading ERROR", readError)
@@ -110,8 +113,8 @@ func EvaluateDeleteAccountResponse(responseDelete *http.Response, deleteError er
 
 	defer responseDelete.Body.Close()
 
-	if responseDelete.StatusCode != HTTP_STATUS_CODE_NO_CONTENT {
-		statusCodeError := errors.New(fmt.Sprintf("Status Code %d different than %d", responseDelete.StatusCode, HTTP_STATUS_CODE_NO_CONTENT))
+	if responseDelete.StatusCode != http.StatusNoContent {
+		statusCodeError := errors.New(fmt.Sprintf("Status Code %d different than %d", responseDelete.StatusCode, http.StatusNoContent))
 		ShowError("EvaluateDeleteAccountResponse", statusCodeError)
 		return &models.ErrorResponse{Message: statusCodeError.Error()}
 	}
