@@ -13,18 +13,6 @@ import (
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
-func GetDecodedRequest(url string, target interface{}) error {
-	response, getError := myClient.Get(url)
-	if getError != nil {
-		ShowError("GetDecodedRequest", getError)
-		return getError
-	}
-	defer response.Body.Close()
-
-	decodeError := json.NewDecoder(response.Body).Decode(&target)
-	return decodeError
-}
-
 func GetUnmarshalledJson(url string, target interface{}) error {
 
 	response, getError := myClient.Get(url)
@@ -90,7 +78,10 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 
 	var accountResponse models.AccountData
 	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
-	return &accountResponse, &models.ErrorResponse{Code: responsePost.StatusCode, Message: decodeError.Error()}
+	if decodeError != nil {
+		return nil, &models.ErrorResponse{Message: decodeError.Error()}
+	}
+	return &accountResponse, nil
 }
 
 func DeleteAccountRequest(url string) (responseDelete *http.Response, err error) {

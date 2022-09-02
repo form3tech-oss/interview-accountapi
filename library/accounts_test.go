@@ -10,68 +10,33 @@ import (
 	"testing"
 )
 
-func TestFetchAccount(t *testing.T) {
-	const accountId = "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc"
-	account, err := library.FetchAccount(accountId)
-
+func getAccountFromFile(filePathName string) (*models.AccountBodyRequest, error) {
+	requestFromFile, err := os.ReadFile(filePathName)
 	if err != nil {
-		t.Error(errors.New(err.Message))
-	}
-
-	if account.Data.Id != accountId {
-		t.Error(errors.New("account does not have same id"))
-	}
-	fmt.Println(account)
-}
-
-// after one insertion
-func TestListAccounts(t *testing.T) {
-	bodyResponse := models.AccountListResponse{}
-	err := library.ListAccounts(&bodyResponse)
-	if err != nil {
-		t.Error(err.Error())
-	} else {
-		fmt.Printf("%+v\n", bodyResponse)
-		if len(bodyResponse.Data) != 1 {
-			t.Errorf("expected %d, but got: %d", 1, len(bodyResponse.Data))
-		}
-		expectedType := "accounts"
-		first := bodyResponse.Data[0]
-		if first.Type != expectedType {
-			t.Errorf("expected %s, but got: %s", expectedType, first.Type)
-		}
-
-		expectedCurrency := "GBP"
-		if first.Attributes.BaseCurrency != expectedCurrency {
-			t.Errorf("expected %s, but got: %s", expectedType, first.Type)
-		}
-	}
-}
-
-// with no insertion
-func TestCreateAccountSuccess(t *testing.T) {
-
-	// get account request
-	requestFromFile, err := os.ReadFile("samples/account_request.json")
-	if err != nil {
-		t.Error(err.Error())
+		return nil, err
 	}
 
 	var accountRequest models.AccountBodyRequest
-	marshallError := json.Unmarshal(requestFromFile, &accountRequest)
-	if marshallError != nil {
-		t.Error(marshallError.Error())
+	err = json.Unmarshal(requestFromFile, &accountRequest)
+	if err != nil {
+		return nil, err
 	}
-	//fmt.Printf("%+v %+v \n", accountRequest, accountRequest.Data.Attributes)
+	return &accountRequest, nil
+}
 
-	// make actual request
-	createResponse, createError := library.CreateAccount(&accountRequest)
+func TestCreateAccountSuccess(t *testing.T) {
+	accountRequest, err := getAccountFromFile("samples/account_request.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	createResponse, createError := library.CreateAccount(accountRequest)
 	if createError != nil {
 		t.Error(errors.New(createError.Message))
 	}
 	fmt.Printf("%+v\n", createResponse)
 
-	// test
+	// test amount
 	accountsResponse := models.AccountListResponse{}
 	err = library.ListAccounts(&accountsResponse)
 	if err != nil {
@@ -81,7 +46,7 @@ func TestCreateAccountSuccess(t *testing.T) {
 		t.Errorf("expected greater or equal to 1 received: %d", len(accountsResponse.Data))
 	}
 
-	// check id
+	// test id
 	sameIds := 0
 	for _, acc := range accountsResponse.Data {
 		if acc.Id == accountRequest.Data.Id {
@@ -93,11 +58,32 @@ func TestCreateAccountSuccess(t *testing.T) {
 	}
 }
 
+func TestFetchAccount(t *testing.T) {
+	accountRequest, err := getAccountFromFile("samples/account_request.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	account, errFetch := library.FetchAccount(accountRequest.Data.Id)
+	if errFetch != nil {
+		t.Error(errors.New(errFetch.Message))
+	}
+
+	// check id
+	if account.Data.Id != accountRequest.Data.Id {
+		t.Error(errors.New("account does not have same id"))
+	}
+	fmt.Println(account)
+}
+
 func TestDeleteAccount(t *testing.T) {
-	accountId := "ad27e265-9605-4b4b-a0e5-3003ea9cc4dd"
-	accountVersion := 0
-	deleteError := library.DeleteAccount(accountId, accountVersion)
+	accountFromFile, err := getAccountFromFile("samples/account_request.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	deleteError := library.DeleteAccount(accountFromFile.Data.Id, accountFromFile.Data.Version)
 	if deleteError != nil {
-		t.Errorf("Account: %s with version: %d, can't be deleted", accountId, accountVersion)
+		t.Errorf("Account: %s with version: %d, can't be deleted", accountFromFile.Data.Id, accountFromFile.Data.Version)
 	}
 }
