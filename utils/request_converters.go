@@ -13,6 +13,48 @@ import (
 
 var myClient = &http.Client{Timeout: 10 * time.Second}
 
+func GetRequest(url string) (resp *http.Response, err error) {
+	response, getError := myClient.Get(url)
+	if getError != nil {
+		ShowError("GetAccountRequest", getError)
+		return nil, getError
+	}
+
+	return response, nil
+}
+
+func EvaluateGetAccountResponse(getResponse *http.Response, err error) (*models.AccountBodyResponse, *models.ErrorResponse) {
+	defer getResponse.Body.Close()
+
+	// evaluate status code
+	if getResponse.StatusCode != http.StatusOK {
+		var errorResponse models.ErrorResponse
+		decodeError := json.NewDecoder(getResponse.Body).Decode(&errorResponse)
+		if decodeError != nil {
+			ShowError("EvaluateGetAccountResponse", decodeError)
+		}
+		errorResponse.Code = getResponse.StatusCode
+
+		return nil, &errorResponse
+	}
+
+	// unmarshall
+	bodyByte, readError := io.ReadAll(getResponse.Body)
+	if readError != nil {
+		ShowError("EvaluateGetAccountResponse while reading", readError)
+		return nil, &models.ErrorResponse{Message: readError.Error()}
+	}
+
+	var accountBodyRespone models.AccountBodyResponse
+	err = json.Unmarshal(bodyByte, &accountBodyRespone)
+	if err != nil {
+		ShowError("EvaluateGetAccountResponse while unmarshalling", err)
+		return nil, &models.ErrorResponse{Message: err.Error()}
+	}
+
+	return &accountBodyRespone, nil
+}
+
 func GetUnmarshalledJson(url string, target interface{}) error {
 
 	response, getError := myClient.Get(url)

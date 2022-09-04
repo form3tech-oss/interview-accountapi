@@ -37,15 +37,8 @@ func FetchAccount(accountId string) (*models.AccountBodyResponse, *models.ErrorR
 	fetchPath := fmt.Sprintf("/v1/organisation/accounts/%s", accountId)
 	requestURL := fmt.Sprintf("%s%s", server, fetchPath)
 
-	account := models.AccountBodyResponse{}
-	decodeError := utils.GetUnmarshalledJson(requestURL, &account)
-
-	if decodeError != nil {
-		//utils.ShowError("FetchAccount", decodeError)
-		return nil, &models.ErrorResponse{Message: decodeError.Error()}
-	}
-
-	return &account, nil
+	account, err := utils.EvaluateGetAccountResponse(utils.GetRequest(requestURL))
+	return account, err
 }
 
 func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountBodyResponse, *models.ErrorResponse) {

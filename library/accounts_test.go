@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/jsebasct/account-api-lib/library"
 	"github.com/jsebasct/account-api-lib/models"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -60,7 +62,7 @@ func TestCreateAccountSuccess(t *testing.T) {
 	}
 }
 
-func TestFetchAccount(t *testing.T) {
+func TestFetchAccountSuccess(t *testing.T) {
 	accountRequest, err := getAccountFromFile("samples/account_request.json")
 	if err != nil {
 		t.Error(err)
@@ -71,14 +73,50 @@ func TestFetchAccount(t *testing.T) {
 		t.Error(errors.New(errFetch.Message))
 	}
 
-	// check id
 	if account.Data.Id != accountRequest.Data.Id {
 		t.Error(errors.New("account does not have same id"))
 	}
-	fmt.Println(account)
 }
 
-func TestDeleteAccount(t *testing.T) {
+func TestFetchUnexistingAccount(t *testing.T) {
+	unexistingAccountId := "ad27e265-9605-4b4b-a0e5-3003ea9cc4cc"
+
+	account, errFetch := library.FetchAccount(unexistingAccountId)
+	if account != nil {
+		fmt.Println("account", account)
+		t.Error(errors.New("the account should be nil since ID doesn't exist"))
+	}
+	if errFetch != nil {
+		if errFetch.Code != http.StatusNotFound {
+			t.Error(errors.New("the response code should be 404"))
+		}
+		if !strings.ContainsAny(errFetch.Message, "does not exist") {
+			t.Error(errors.New("wrong message for not found"))
+		}
+		fmt.Println("message", errFetch)
+	}
+}
+
+func TestFetchInvalidId(t *testing.T) {
+	unexistingAccountId := "ad27e265-9605-4b4b-a0e5-3003ea9cc4cc_11111"
+
+	account, errFetch := library.FetchAccount(unexistingAccountId)
+	if account != nil {
+		fmt.Println("account", account)
+		t.Error(errors.New("the account should be nil since ID doesn't exist"))
+	}
+	if errFetch != nil {
+		if errFetch.Code != http.StatusBadRequest {
+			t.Error(errors.New("the response code should be 400"))
+		}
+		if !strings.ContainsAny(errFetch.Message, "does not exist") {
+			t.Error(errors.New("wrong message for not found"))
+		}
+		fmt.Println("message", errFetch)
+	}
+}
+
+func TestDeleteAccountSuccess(t *testing.T) {
 	accountFromFile, err := getAccountFromFile("samples/account_request.json")
 	if err != nil {
 		t.Error(err)
