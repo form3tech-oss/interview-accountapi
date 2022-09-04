@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  accountapi-tests:
+    build:
+      context: .
+      dockerfile: ./resources/Dockerfile
+    volumes:
+      - $PWD:/go/src/github.com/jsebasct/account-api-lib
+    depends_on:
+      - accountapi
+    environment:
+      - SERVER_URL=http://accountapi:8080
   accountapi:
     image: form3tech/interview-accountapi:v1.0.0-46-gb3b6c766
     restart: on-failure
@@ -21,6 +31,8 @@ services:
       - DATABASE-PASSWORD=123
     ports:
       - 8080:8080
+    expose:
+      - 8080
   postgresql:
     image: postgres:9.5-alpine
     healthcheck:

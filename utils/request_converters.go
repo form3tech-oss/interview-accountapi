@@ -46,14 +46,14 @@ func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (res
 		return nil, marshallErr
 	}
 
-	responsePost, postError := myClient.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	responsePost, postError := myClient.Post(url, "application/vnd.api+json", bytes.NewBuffer(jsonData))
 	return responsePost, postError
 }
 
-func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (*models.AccountData, *models.ErrorResponse) {
+func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (*models.AccountBodyResponse, *models.ErrorResponse) {
 
 	if postError != nil {
-		ShowError("PostAccountRequest", postError)
+		ShowError("EvaluatePostAccountResponse", postError)
 		return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: postError.Error()}
 	}
 
@@ -62,21 +62,25 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 	if responsePost.StatusCode != http.StatusCreated {
 		bodyErrorByte, readError := io.ReadAll(responsePost.Body)
 		if readError != nil {
-			ShowError("PostAccountRequest while reading ERROR", readError)
+			ShowError("EvaluatePostAccountResponse while reading ERROR", readError)
 			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: readError.Error()}
 		}
 
-		errorMessage := models.ErrorResponse{}
+		fmt.Println("bad body as string", string(bodyErrorByte))
+
+		var errorMessage models.ErrorResponse
 		err := json.Unmarshal(bodyErrorByte, &errorMessage)
 		if err != nil {
-			ShowError("PostAccountRequest while unmarshalling", err)
+			ShowError("EvaluatePostAccountResponse while unmarshalling", err)
 			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: err.Error()}
 		} else {
+			internalErrorMsg := fmt.Sprintf("EvaluatePostAccountResponse with status code: %d", responsePost.StatusCode)
+			ShowError(internalErrorMsg, errors.New(errorMessage.Message))
 			return nil, &errorMessage
 		}
 	}
 
-	var accountResponse models.AccountData
+	var accountResponse models.AccountBodyResponse
 	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
 	if decodeError != nil {
 		return nil, &models.ErrorResponse{Message: decodeError.Error()}

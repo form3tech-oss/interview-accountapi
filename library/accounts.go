@@ -5,15 +5,23 @@ import (
 	"fmt"
 	"github.com/jsebasct/account-api-lib/models"
 	"github.com/jsebasct/account-api-lib/utils"
+	"os"
 )
 
-const SERVER = "http://localhost:8080"
+func GetServerURL() string {
+	var server = os.Getenv("SERVER_URL")
+	if server == "" {
+		server = "http://localhost:8080"
+	}
+	return server
+}
 
 func ListAccounts(bodyResponse *models.AccountListResponse) error {
+	server := GetServerURL()
+	fmt.Println("SERVER", server)
 	const listPath = "/v1/organisation/accounts/"
-	requestURL := fmt.Sprintf("%s%s", SERVER, listPath)
+	requestURL := fmt.Sprintf("%s%s", server, listPath)
 
-	//decodeError := utils.GetDecodedRequest(requestURL, &bodyResponse)
 	decodeError := utils.GetUnmarshalledJson(requestURL, &bodyResponse)
 
 	if decodeError != nil {
@@ -25,9 +33,9 @@ func ListAccounts(bodyResponse *models.AccountListResponse) error {
 }
 
 func FetchAccount(accountId string) (*models.AccountBodyResponse, *models.ErrorResponse) {
-
+	server := GetServerURL()
 	fetchPath := fmt.Sprintf("/v1/organisation/accounts/%s", accountId)
-	requestURL := fmt.Sprintf("%s%s", SERVER, fetchPath)
+	requestURL := fmt.Sprintf("%s%s", server, fetchPath)
 
 	account := models.AccountBodyResponse{}
 	decodeError := utils.GetUnmarshalledJson(requestURL, &account)
@@ -40,16 +48,20 @@ func FetchAccount(accountId string) (*models.AccountBodyResponse, *models.ErrorR
 	return &account, nil
 }
 
-func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountData, *models.ErrorResponse) {
+func CreateAccount(bodyRequest *models.AccountBodyRequest) (*models.AccountBodyResponse, *models.ErrorResponse) {
+	server := GetServerURL()
 	const postPath = "/v1/organisation/accounts/"
-	requestURL := fmt.Sprintf("%s%s", SERVER, postPath)
+	requestURL := fmt.Sprintf("%s%s", server, postPath)
+	fmt.Println("create account to URL: ", requestURL)
+
 	response, errorResponse := utils.EvaluatePostAccountResponse(utils.PostAccountRequest(requestURL, bodyRequest))
 	return response, errorResponse
 }
 
 func DeleteAccount(accountId string, accountVersion int) *models.ErrorResponse {
+	server := GetServerURL()
 	var deletePath = fmt.Sprintf("/v1/organisation/accounts/%s?version=%d", accountId, accountVersion)
-	requestURL := fmt.Sprintf("%s%s", SERVER, deletePath)
+	requestURL := fmt.Sprintf("%s%s", server, deletePath)
 
 	response := utils.EvaluateDeleteAccountResponse(utils.DeleteAccountRequest(requestURL))
 	return response

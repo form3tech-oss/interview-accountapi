@@ -25,6 +25,7 @@ func getAccountFromFile(filePathName string) (*models.AccountBodyRequest, error)
 }
 
 func TestCreateAccountSuccess(t *testing.T) {
+
 	accountRequest, err := getAccountFromFile("samples/account_request.json")
 	if err != nil {
 		t.Error(err)
@@ -32,9 +33,10 @@ func TestCreateAccountSuccess(t *testing.T) {
 
 	createResponse, createError := library.CreateAccount(accountRequest)
 	if createError != nil {
+		fmt.Printf("Error while creating: %+v\n", createError)
 		t.Error(errors.New(createError.Message))
 	}
-	fmt.Printf("%+v\n", createResponse)
+	fmt.Printf("Created response: %+v\n", createResponse)
 
 	// test amount
 	accountsResponse := models.AccountListResponse{}
