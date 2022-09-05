@@ -27,7 +27,6 @@ func getAccountFromFile(filePathName string) (*models.AccountBodyRequest, error)
 }
 
 func TestCreateAccountSuccess(t *testing.T) {
-
 	accountRequest, err := getAccountFromFile("samples/account_request.json")
 	if err != nil {
 		t.Error(err)

@@ -29,24 +29,17 @@ func EvaluateGetAccountResponse(getResponse *http.Response, err error) (*models.
 	// evaluate status code
 	if getResponse.StatusCode != http.StatusOK {
 		var errorResponse models.ErrorResponse
-		decodeError := json.NewDecoder(getResponse.Body).Decode(&errorResponse)
-		if decodeError != nil {
-			ShowError("EvaluateGetAccountResponse", decodeError)
+		err = UnmarshalTo(getResponse.Body, &errorResponse)
+		if err != nil {
+			ShowError("EvaluateGetAccountResponse", err)
 		}
 		errorResponse.Code = getResponse.StatusCode
 
 		return nil, &errorResponse
 	}
 
-	// unmarshall
-	bodyByte, readError := io.ReadAll(getResponse.Body)
-	if readError != nil {
-		ShowError("EvaluateGetAccountResponse while reading", readError)
-		return nil, &models.ErrorResponse{Message: readError.Error()}
-	}
-
 	var accountBodyRespone models.AccountBodyResponse
-	err = json.Unmarshal(bodyByte, &accountBodyRespone)
+	err = UnmarshalTo(getResponse.Body, &accountBodyRespone)
 	if err != nil {
 		ShowError("EvaluateGetAccountResponse while unmarshalling", err)
 		return nil, &models.ErrorResponse{Message: err.Error()}
@@ -70,13 +63,7 @@ func GetUnmarshalledJson(url string, target interface{}) error {
 		return err
 	}
 
-	bodyByte, readError := io.ReadAll(response.Body)
-	if readError != nil {
-		ShowError("GetUnmarshalledJson while reading", readError)
-		return readError
-	}
-
-	res := json.Unmarshal(bodyByte, target)
+	res := UnmarshalTo(response.Body, target)
 	return res
 }
 
@@ -93,7 +80,6 @@ func PostAccountRequest(url string, bodyRequest *models.AccountBodyRequest) (res
 }
 
 func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (*models.AccountBodyResponse, *models.ErrorResponse) {
-
 	if postError != nil {
 		ShowError("EvaluatePostAccountResponse", postError)
 		return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: postError.Error()}
@@ -102,16 +88,8 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 	defer responsePost.Body.Close()
 
 	if responsePost.StatusCode != http.StatusCreated {
-		bodyErrorByte, readError := io.ReadAll(responsePost.Body)
-		if readError != nil {
-			ShowError("EvaluatePostAccountResponse while reading ERROR", readError)
-			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: readError.Error()}
-		}
-
-		fmt.Println("bad body as string", string(bodyErrorByte))
-
 		var errorMessage models.ErrorResponse
-		err := json.Unmarshal(bodyErrorByte, &errorMessage)
+		err := UnmarshalTo(responsePost.Body, &errorMessage)
 		if err != nil {
 			ShowError("EvaluatePostAccountResponse while unmarshalling", err)
 			return nil, &models.ErrorResponse{Code: responsePost.StatusCode, Message: err.Error()}
@@ -123,7 +101,7 @@ func EvaluatePostAccountResponse(responsePost *http.Response, postError error) (
 	}
 
 	var accountResponse models.AccountBodyResponse
-	decodeError := json.NewDecoder(responsePost.Body).Decode(&accountResponse)
+	decodeError := UnmarshalTo(responsePost.Body, &accountResponse)
 	if decodeError != nil {
 		return nil, &models.ErrorResponse{Message: decodeError.Error()}
 	}
@@ -156,7 +134,7 @@ func EvaluateDeleteAccountResponse(responseDelete *http.Response, deleteError er
 
 	if responseDelete.StatusCode != http.StatusNoContent {
 		var errorResponse models.ErrorResponse
-		unmarshallErr := UnmarshallTo(responseDelete.Body, &errorResponse)
+		unmarshallErr := UnmarshalTo(responseDelete.Body, &errorResponse)
 		if unmarshallErr != nil {
 			ShowError("EvaluateDeleteAccountResponse", unmarshallErr)
 			return &models.ErrorResponse{Message: unmarshallErr.Error()}
@@ -168,10 +146,10 @@ func EvaluateDeleteAccountResponse(responseDelete *http.Response, deleteError er
 	return nil
 }
 
-func UnmarshallTo(body io.ReadCloser, target interface{}) error {
+func UnmarshalTo(body io.ReadCloser, target interface{}) error {
 	bodyByte, readError := io.ReadAll(body)
 	if readError != nil {
-		ShowError("UnmarshallTo while reading", readError)
+		ShowError("UnmarshalTo while reading", readError)
 		return readError
 	}
 
