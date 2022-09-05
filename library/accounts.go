@@ -23,6 +23,7 @@ func ListAccounts(bodyResponse *models.AccountListResponse) error {
 	requestURL := fmt.Sprintf("%s%s", server, listPath)
 
 	decodeError := utils.GetUnmarshalledJson(requestURL, &bodyResponse)
+	//account, err := utils.EvaluateGetAccountResponse(utils.GetRequest(requestURL))
 
 	if decodeError != nil {
 		utils.ShowError("ListAccounts", decodeError)

@@ -116,6 +116,29 @@ func TestFetchInvalidId(t *testing.T) {
 	}
 }
 
+func TestDeleteAccountInvalidVersion(t *testing.T) {
+	accountFromFile, err := getAccountFromFile("samples/account_request.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	deleteError := library.DeleteAccount(accountFromFile.Data.Id, accountFromFile.Data.Version+10)
+
+	if deleteError == nil {
+		t.Error("should have returned an error")
+	}
+	fmt.Printf("%+v", deleteError)
+
+	if deleteError.Code != http.StatusConflict {
+		t.Errorf("should have returned a status %d", http.StatusConflict)
+	}
+
+	expectedErrMsg := "invalid version"
+	if expectedErrMsg != deleteError.Message {
+		t.Errorf("message should be: %s", expectedErrMsg)
+	}
+}
+
 func TestDeleteAccountSuccess(t *testing.T) {
 	accountFromFile, err := getAccountFromFile("samples/account_request.json")
 	if err != nil {
@@ -125,5 +148,20 @@ func TestDeleteAccountSuccess(t *testing.T) {
 	deleteError := library.DeleteAccount(accountFromFile.Data.Id, accountFromFile.Data.Version)
 	if deleteError != nil {
 		t.Errorf("Account: %s with version: %d, can't be deleted", accountFromFile.Data.Id, accountFromFile.Data.Version)
+	}
+}
+
+func TestDeleteAccountNotFound(t *testing.T) {
+	accountId := "ad27e265-9605-4b4b-a0e5-3003ea9cc4ff"
+	version := 0
+	deleteError := library.DeleteAccount(accountId, version)
+
+	if deleteError == nil {
+		t.Error("should have returned an error")
+	}
+	fmt.Printf("%+v", deleteError)
+
+	if deleteError.Code != http.StatusNotFound {
+		t.Errorf("should have returned a status %d", http.StatusNotFound)
 	}
 }

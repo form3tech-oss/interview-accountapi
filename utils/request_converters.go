@@ -150,11 +150,31 @@ func EvaluateDeleteAccountResponse(responseDelete *http.Response, deleteError er
 
 	defer responseDelete.Body.Close()
 
+	if responseDelete.StatusCode == http.StatusNotFound {
+		return &models.ErrorResponse{Code: http.StatusNotFound, Message: "Not Found"}
+	}
+
 	if responseDelete.StatusCode != http.StatusNoContent {
-		statusCodeError := errors.New(fmt.Sprintf("Status Code %d different than %d", responseDelete.StatusCode, http.StatusNoContent))
-		ShowError("EvaluateDeleteAccountResponse", statusCodeError)
-		return &models.ErrorResponse{Message: statusCodeError.Error()}
+		var errorResponse models.ErrorResponse
+		unmarshallErr := UnmarshallTo(responseDelete.Body, &errorResponse)
+		if unmarshallErr != nil {
+			ShowError("EvaluateDeleteAccountResponse", unmarshallErr)
+			return &models.ErrorResponse{Message: unmarshallErr.Error()}
+		}
+		errorResponse.Code = responseDelete.StatusCode
+		return &errorResponse
 	}
 
 	return nil
+}
+
+func UnmarshallTo(body io.ReadCloser, target interface{}) error {
+	bodyByte, readError := io.ReadAll(body)
+	if readError != nil {
+		ShowError("UnmarshallTo while reading", readError)
+		return readError
+	}
+
+	res := json.Unmarshal(bodyByte, target)
+	return res
 }
