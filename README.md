@@ -1,5 +1,29 @@
 # Form3 Take Home Exercise - Submission by Gianni Massi
 
+## Solution
+
+The solution is provided as a go module (github.com/giannimassi/interview-accountapi/accountapi) exposing functions to instantiate a client to the Account API with options including host and custom http client (e.g. useful for customizing timeouts). The client provides functions to create, fetch and delete an Account.
+
+### Testing
+
+All tests are run via the docker compose command. Tests are organized as follows:
+
+- unit tests: these can be found in the accountapi/accountapi_test.go and they test the behaviour of the functions is as expected, by providing a mocked backend;
+- integration tests: these can be found accountapi/tests/account_api_test.go and they test that the outcome of calling these functions against the actual backend works.
+
+End-to-end and acceptance tests might also be worth implementing, depending on the context where this API is deployed and who its users are (e.g. if it is to be exposed as a product of its own, acceptance tests would be desirable to make sure the product satisfies the business requirements, if it is to be used by a web page, a end-to-end test would also be good).
+
+#### Running tests locally with docker-compose
+
+The following command can be used to run the tests via docker-compose:
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml run tests
+````
+
+Note: the docker-compose.yml file provided for the excercise has not been modified, but instead an override file has been created to separate the docker-compose.yml running the backend and its dependencies from the one testing the library to interface with it. Ideally thefirst docker compose file would be owned by the same team managing the backend and part of the backend repo (if this makes sense according to how the rest of repos are managed).
+
+[What follows is the provided excercise brief for reference]
+
 ## Introduction
 Engineers at Form3 build highly available distributed systems in a microservices environment. Our take home test is designed to evaluate real world activities that are involved with this role. We recognise that this may not be as mentally challenging and may take longer to implement than some algorithmic tests that are often seen in interview exercises. Our approach however helps ensure that you will be working with a team of engineers with the necessary practical skills for the role (as well as a diverse range of technical wizardry). 
 
