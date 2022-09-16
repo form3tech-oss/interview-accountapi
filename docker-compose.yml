@@ -21,6 +21,7 @@ services:
       - DATABASE-PASSWORD=123
     ports:
       - 8080:8080
+    hostname: accountapi
   postgresql:
     image: postgres:9.5-alpine
     healthcheck:
@@ -34,6 +35,16 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - ./scripts/db:/docker-entrypoint-initdb.d/
+  tests:
+    image: golang:1.19.1
+    depends_on:
+      - accountapi
+    environment:
+      - ACCOUNTAPI_HOST=http://accountapi:8080
+    volumes:
+      - $PWD:/go/src/github.com/giannimassi/accountapi
+    working_dir: /go/src/github.com/giannimassi/accountapi
+    command: go test -count=1 -race ./...
 
   vault:
     image: vault:1.6.3

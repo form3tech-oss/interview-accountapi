@@ -17,10 +17,35 @@ End-to-end and acceptance tests might also be worth implementing, depending on t
 
 The following command can be used to run the tests via docker-compose:
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.tests.yml run tests
+docker-compose up
 ````
 
-Note: the docker-compose.yml file provided for the excercise has not been modified, but instead an override file has been created to separate the docker-compose.yml running the backend and its dependencies from the one testing the library to interface with it. Ideally thefirst docker compose file would be owned by the same team managing the backend and part of the backend repo (if this makes sense according to how the rest of repos are managed).
+This will start the backend docker image with its dependencies and then run both unit and integration tests. This is well suited for running on push in CI to make sure there are no regressions from changes.
+
+Note: a different approach would be to not modify the docker-compose.yml but to add an override file that adds the test run on top of the existing docker compose file, separating the concerns (testing vs running locally). Assuming the original _docker-compose.yml_ did not get modified, and a second file called _docker-compose.tests.yml_ was created in the root dir with the following contents:
+
+```yaml
+services:
+  accountapi:
+    hostname: accountapi
+  tests:
+    image: golang:1.19.1
+    depends_on:
+      - accountapi
+    environment:
+      - ACCOUNTAPI_HOST=http://accountapi:8080
+    volumes:
+      - $PWD:/go/src/github.com/giannimassi/accountapi
+    working_dir: /go/src/github.com/giannimassi/accountapi
+    command: go test -count=1 -race ./...
+```
+
+Test would be run with the following command:
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.tests.yml run tests
+```
+This might make sense if the first docker-compose.yml is used for other scopes as well (e.g. manual testing, qa, etc).
 
 [What follows is the provided excercise brief for reference]
 
