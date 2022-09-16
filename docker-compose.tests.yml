@@ -1,0 +1,14 @@
+services:
+  accountapi:
+    hostname: accountapi
+  tests:
+    image: golang:1.19.1
+    depends_on:
+      - accountapi
+    environment:
+      - ACCOUNTAPI_HOST=http://accountapi:8080
+    volumes:
+      - $PWD:/go/src/github.com/giannimassi/accountapi
+    working_dir: /go/src/github.com/giannimassi/accountapi
+    command: go test -count=1 -race ./...
+    
