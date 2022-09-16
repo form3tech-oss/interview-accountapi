@@ -1,3 +1,4 @@
+// Package accountapi provides a type and methods to make calls to the Account API.
 package accountapi
 
 import (
