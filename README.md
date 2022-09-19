@@ -2,7 +2,7 @@
 
 ## Solution
 
-The solution is provided as a go module (github.com/giannimassi/interview-accountapi/accountapi) exposing functions to instantiate a client to the Account API with options including host and custom http client (e.g. useful for customizing timeouts). The client provides methods txo create, fetch and delete an Account. The methods support providing a context for controlling cancellation and expect the type `AccountData`. This might not be the most ergonomic in many cases and I would expect some utility methods to be added as needed, not expecting a full `AccountData` struct but only the data required to make the call (making more clear what is expected).
+The solution is provided as a go module (github.com/giannimassi/interview-accountapi/accountapi) exposing functions to instantiate a client to the Account API with options including host and custom http client (e.g. useful for customizing timeouts). The client provides methods txo create, fetch and delete an Account. The methods support providing a context for controlling cancellation and expect the type `AccountData`. This might not be the most ergonomic in many cases and I would expect some utility methods to be added as needed, not expecting a full `AccountData` struct but only the data required to make the call (making more clear what is expected). Also this will make some of the API more fool-proof: for example, it is very easy right now to provide an account that has nil version to the `Delete` method, resulting in a panic. Having a different signature method for deleting an account is a design decision that depends on the goal of this library: is it going to be used by the same team that created for internal tools? Is it going to be opened to the public and provided to customers to implement calls to our service? These are questions that need an answer that will result in a better design for this package before its use in a production environment.
 
 ### Testing
 
@@ -16,6 +16,7 @@ End-to-end and acceptance tests might also be worth implementing, depending on t
 #### Running tests locally with docker-compose
 
 The following command can be used to run the tests via docker-compose:
+
 ```bash
 docker-compose up
 ````
