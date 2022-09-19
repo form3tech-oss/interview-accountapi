@@ -2,7 +2,7 @@
 
 ## Solution
 
-The solution is provided as a go module (github.com/giannimassi/interview-accountapi/accountapi) exposing functions to instantiate a client to the Account API with options including host and custom http client (e.g. useful for customizing timeouts). The client provides methods to create, fetch and delete an Account. The methods support providing a context for controlling cancellation and expect the type `AccountData`. This might not be the most ergonomic in many cases and I would expect some utility methods to be added as needed, not expecting a full `AccountData` struct but only the data required to make the call (making more clear what is expected).
+The solution is provided as a go module (github.com/giannimassi/interview-accountapi/accountapi) exposing functions to instantiate a client to the Account API with options including host and custom http client (e.g. useful for customizing timeouts). The client provides methods txo create, fetch and delete an Account. The methods support providing a context for controlling cancellation and expect the type `AccountData`. This might not be the most ergonomic in many cases and I would expect some utility methods to be added as needed, not expecting a full `AccountData` struct but only the data required to make the call (making more clear what is expected).
 
 ### Testing
 
