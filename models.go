@@ -1,5 +1,5 @@
 // Account represents an account in the form3 org section.
-// See https://api-docs.form3.tech/api.html#organisation-accounts for
+// See https://www.api-docs.form3.tech/api/schemes/sepa-instant-credit-transfer/accounts/accounts for
 // more information about fields.
 type AccountData struct {
 	Attributes     *AccountAttributes `json:"attributes,omitempty"`
