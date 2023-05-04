@@ -4,14 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
-
-var ErrDuplicatedAccount = errors.New("duplicated account")
 
 // configurations for the account client
 type Config struct {
@@ -91,30 +88,45 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 		return nil, err
 	}
 
-	defer res.Body.Close()
+	result := Response{}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	result := Response{}
-	err = json.Unmarshal(b, &result)
-	if err != nil {
-		return nil, err
+	if len(b) > 0 {
+		err = json.Unmarshal(b, &result)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	if result.ErrorMessage != nil {
-		msg := fmt.Sprintf("account error: (%d) %s", res.StatusCode, *result.ErrorMessage)
-
-		if res.StatusCode == 409 {
-			return nil, fmt.Errorf("%s: %w", msg, ErrDuplicatedAccount)
-		} else {
-			return nil, fmt.Errorf(msg)
-		}
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return nil, newErrorResponse(res.StatusCode, result.ErrorMessage)
 	}
 	return result.Data, nil
 }
 
 //TODO: Timeouts, Rate Limiting and Retry Strategy
 //Should a request to the Form3 API respond with a status code indicating a temporary error (429, 500, 503 or 504, see above) or no response is received at all, wait and retry the request using an exponential back-off algorithm. See the code panel on the right for a simple example implementation in pseudo code.
+
+type ErrorResponse struct {
+	Code    int
+	Message string
+}
+
+func newErrorResponse(code int, message *string) *ErrorResponse {
+	return &ErrorResponse{
+		Code:    code,
+		Message: *message,
+	}
+}
+
+func (er *ErrorResponse) Error() string {
+	return fmt.Sprintf("error: (%d) message: %s", er.Code, er.Message)
+}

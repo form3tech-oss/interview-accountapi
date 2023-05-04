@@ -45,11 +45,17 @@ func main() {
 		fmt.Println(err)
 	}
 
+	var errorResponse *account.ErrorResponse
+
 	res, err = client.CreateAccount(ctx, createRequest())
 	if err == nil {
 		printAccount(res)
-	} else if errors.Unwrap(err) == account.ErrDuplicatedAccount {
-		fmt.Println("ESTA OK: %w", err)
+	} else if errors.As(err, &errorResponse) {
+		fmt.Printf("ESTA OK code => %d\n", errorResponse.Code)
+		fmt.Printf("ESTA OK message => %s\n", errorResponse.Message)
+		fmt.Printf("ESTA OK err => %v", err)
+		fmt.Printf("ESTA OK errorResponse => %v", errorResponse)
+
 	} else {
 		fmt.Println("ESTA MAL: %w", err)
 	}
@@ -96,6 +102,11 @@ func createRequest() *account.AccountData {
 }
 
 func printAccount(res *account.AccountData) {
+	if res == nil {
+		fmt.Println("<<nil>>")
+		return
+	}
+
 	j, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		fmt.Println("error: %w", err)
