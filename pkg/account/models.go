@@ -1,3 +1,10 @@
+package account
+
+type Response struct {
+	Data         AccountData `json:"data"`
+	ErrorMessage string      `json:"error_message"`
+}
+
 // Account represents an account in the form3 org section.
 // See https://api-docs.form3.tech/api.html#organisation-accounts for
 // more information about fields.
@@ -7,6 +14,7 @@ type AccountData struct {
 	OrganisationID string             `json:"organisation_id,omitempty"`
 	Type           string             `json:"type,omitempty"`
 	Version        *int64             `json:"version,omitempty"`
+	CreatedOn      string             `json:"created_on,omitempty"`
 }
 
 type AccountAttributes struct {
