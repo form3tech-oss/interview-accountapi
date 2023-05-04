@@ -4,11 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"time"
 )
+
+var ErrDuplicatedAccount = errors.New("duplicated account")
 
 // configurations for the account client
 type Config struct {
@@ -43,24 +46,24 @@ func (a *AccountClient) getUrl() string {
 	return fmt.Sprintf("http://%s:%v/%s/organisation/accounts", a.Host, a.Port, a.Version)
 }
 
-func (a *AccountClient) CreateAccount(ctx context.Context, request *Request) (*Response, error) {
-	body, err := json.Marshal(request)
+func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountData) (*AccountData, error) {
+	body, err := json.Marshal(Request{Data: accountData})
 	if err != nil {
 		return nil, err
 	}
 	return a.ExecuteRequest(ctx, http.MethodPost, a.getUrl(), body)
 }
 
-func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) (*Response, error) {
+func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) (*AccountData, error) {
 	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.getUrl(), accountId, version), nil)
 }
 
-func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*Response, error) {
+func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*AccountData, error) {
 	//add parameter to url to fetch account
 	return a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.getUrl(), accountId), nil)
 }
 
-func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte) (*Response, error) {
+func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte) (*AccountData, error) {
 
 	var reader io.Reader
 	if body != nil {
@@ -100,7 +103,17 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 	if err != nil {
 		return nil, err
 	}
-	return &result, nil
+
+	if result.ErrorMessage != nil {
+		msg := fmt.Sprintf("account error: (%d) %s", res.StatusCode, *result.ErrorMessage)
+
+		if res.StatusCode == 409 {
+			return nil, fmt.Errorf("%s: %w", msg, ErrDuplicatedAccount)
+		} else {
+			return nil, fmt.Errorf(msg)
+		}
+	}
+	return result.Data, nil
 }
 
 //TODO: Timeouts, Rate Limiting and Retry Strategy
