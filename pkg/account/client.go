@@ -43,16 +43,16 @@ func (a *AccountClient) getUrl() string {
 	return fmt.Sprintf("http://%s:%v/%s/organisation/accounts", a.Host, a.Port, a.Version)
 }
 
-func (a *AccountClient) CreateAccount(ctx context.Context, account AccountAttributes) (*Response, error) {
-	body, err := json.Marshal(account)
+func (a *AccountClient) CreateAccount(ctx context.Context, request *Request) (*Response, error) {
+	body, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
 	return a.ExecuteRequest(ctx, http.MethodPost, a.getUrl(), body)
 }
 
-func (a *AccountClient) DeleteAccount(ctx context.Context, accountId, version string) (*Response, error) {
-	return a.ExecuteRequest(ctx, http.MethodDelete, a.getUrl(), nil)
+func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) (*Response, error) {
+	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.getUrl(), accountId, version), nil)
 }
 
 func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*Response, error) {
@@ -62,18 +62,21 @@ func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*Re
 
 func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte) (*Response, error) {
 
-	reader, length := getBodyReaderAndLength(body)
+	var reader io.Reader
+	if body != nil {
+		reader = bytes.NewReader(body)
+	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, reader)
+	req, err := http.NewRequestWithContext(ctx, method, url, reader)
 
 	req.Header.Set("Host", "api.form3.tech")
 	req.Header.Set("Date", time.Now().Format(time.RFC3339))
 	req.Header.Set("Accept", "vnd.api+json")
 	req.Header.Set("Accept-Encoding", "gzip")
 
-	if length > 0 {
+	if len(body) > 0 {
 		req.Header.Set("Content-Type", "application/vnd.api+json")
-		req.Header.Set("Content-Length", fmt.Sprint(length))
+		req.Header.Set("Content-Length", fmt.Sprint(len(body)))
 	}
 
 	if err != nil {
@@ -98,13 +101,6 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 		return nil, err
 	}
 	return &result, nil
-}
-
-func getBodyReaderAndLength(body []byte) (io.Reader, int) {
-	if len(body) > 0 {
-		return bytes.NewReader(body), len(body)
-	}
-	return nil, 0
 }
 
 //TODO: Timeouts, Rate Limiting and Retry Strategy

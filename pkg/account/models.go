@@ -1,8 +1,12 @@
 package account
 
+type Request struct {
+	Data *AccountData `json:"data"`
+}
+
 type Response struct {
-	Data         AccountData `json:"data"`
-	ErrorMessage string      `json:"error_message"`
+	Data         *AccountData `json:"data"`
+	ErrorMessage *string      `json:"error_message"`
 }
 
 // Account represents an account in the form3 org section.
