@@ -5,8 +5,8 @@ type Request struct {
 }
 
 type Response struct {
-	Data         *AccountData `json:"data"`
-	ErrorMessage *string      `json:"error_message"`
+	Data         interface{} `json:"data"`
+	ErrorMessage *string     `json:"error_message"`
 }
 
 // Account represents an account in the form3 org section.

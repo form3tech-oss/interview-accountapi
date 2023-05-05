@@ -48,19 +48,20 @@ func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountD
 	if err != nil {
 		return nil, err
 	}
-	return a.ExecuteRequest(ctx, http.MethodPost, a.getUrl(), body)
+	data := &AccountData{}
+	return data, a.ExecuteRequest(ctx, http.MethodPost, a.getUrl(), body, data)
 }
 
-func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) (*AccountData, error) {
-	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.getUrl(), accountId, version), nil)
+func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) error {
+	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.getUrl(), accountId, version), nil, nil)
 }
 
 func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*AccountData, error) {
-	//add parameter to url to fetch account
-	return a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.getUrl(), accountId), nil)
+	data := &AccountData{}
+	return data, a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.getUrl(), accountId), nil, data)
 }
 
-func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte) (*AccountData, error) {
+func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte, i interface{}) error {
 
 	var reader io.Reader
 	if body != nil {
@@ -80,15 +81,13 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 	}
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	res, err := a.HttpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	result := Response{}
 
 	if res.Body != nil {
 		defer res.Body.Close()
@@ -96,20 +95,24 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	result := &Response{
+		Data: i,
 	}
 
 	if len(b) > 0 {
-		err = json.Unmarshal(b, &result)
+		err = json.Unmarshal(b, result)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return nil, newErrorResponse(res.StatusCode, result.ErrorMessage)
+		return newErrorResponse(res.StatusCode, result.ErrorMessage)
 	}
-	return result.Data, nil
+	return nil
 }
 
 //TODO: Timeouts, Rate Limiting and Retry Strategy

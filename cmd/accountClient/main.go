@@ -28,9 +28,9 @@ func main() {
 	res, err := client.FetchAccount(ctx, "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc")
 	if err == nil {
 		printAccount(res)
-		res, err = client.DeleteAccount(ctx, "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc", *res.Version)
+		err = client.DeleteAccount(ctx, "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc", *res.Version)
 		if err == nil {
-			printAccount(res)
+			fmt.Printf("Deleted account %s %d\n", res.ID, res.Version)
 		} else {
 			fmt.Println(err)
 		}
