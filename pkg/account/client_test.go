@@ -460,6 +460,7 @@ func TestNewAccountClient(t *testing.T) {
 		})
 	}
 }
+
 func createAccount() *AccountData {
 	version := int64(0)
 	country := "GB"
@@ -474,7 +475,7 @@ func createAccount() *AccountData {
 		OrganisationID: "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
 		Type:           "accounts",
 		Version:        &version,
-		CreatedOn:      "2021-01-01T00:00:00Z",
+		CreatedOn:      "2023-05-06T17:25:05.311Z",
 		Attributes: &AccountAttributes{
 			Country:                 &country,
 			BaseCurrency:            "GBP",
@@ -483,7 +484,7 @@ func createAccount() *AccountData {
 			Bic:                     "EXMPLGB2XXX",
 			AccountNumber:           "12345678",
 			Name:                    []string{"FIRST", "LAST"},
-			AlternativeNames:        []string{"FIRST", "LAST"},
+			AlternativeNames:        nil,
 			AccountClassification:   &accountClassification,
 			JointAccount:            &jointAccount,
 			AccountMatchingOptOut:   &accountMatchingOptOut,

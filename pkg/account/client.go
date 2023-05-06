@@ -146,6 +146,6 @@ func newErrorResponse(code int, message *string) *ErrorResponse {
 	}
 }
 
-func (er *ErrorResponse) Error() string {
+func (er ErrorResponse) Error() string {
 	return fmt.Sprintf("error: (%d) message: %s", er.Code, er.Message)
 }
