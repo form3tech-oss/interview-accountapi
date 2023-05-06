@@ -12,27 +12,33 @@ import (
 
 // configurations for the account client
 type Config struct {
-	BaseUrl string
-	Version string
+	BaseUrl    string
+	Version    string
+	MaxRetries int
 }
 
 // AccountClient is a client for the account service.
 type AccountClient struct {
-	BaseUrl    string
-	Version    string
-	HttpClient *http.Client
+	BaseUrl           string
+	Version           string
+	HttpClient        *http.Client
+	LimitRateAndRetry *LimitRateAndRetry
 }
 
 // NewAccountClient creates an AccountClient using a Config struct and returning a pointer to it.
 func NewAccountClient(c *Config) *AccountClient {
 	if c == nil {
-		return &AccountClient{HttpClient: &http.Client{}}
+		return &AccountClient{HttpClient: &http.Client{}, LimitRateAndRetry: &LimitRateAndRetry{}}
 	}
 
+	httpClient := &http.Client{}
 	return &AccountClient{
 		BaseUrl:    c.BaseUrl,
 		Version:    c.Version,
-		HttpClient: &http.Client{},
+		HttpClient: httpClient,
+		LimitRateAndRetry: &LimitRateAndRetry{
+			MaxRetries: &c.MaxRetries,
+		},
 	}
 }
 
@@ -82,7 +88,7 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 		return err
 	}
 
-	res, err := a.HttpClient.Do(req)
+	res, err := a.LimitRateAndRetry.ExponentialBackOff(a.HttpClient, req)
 	if err != nil {
 		return err
 	}
