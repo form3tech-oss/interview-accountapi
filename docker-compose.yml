@@ -34,6 +34,9 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - ./scripts/db:/docker-entrypoint-initdb.d/
+    ports:
+      - 5432:5432
+
 
   vault:
     image: vault:1.6.3

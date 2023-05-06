@@ -111,38 +111,3 @@ func printAccount(res *account.AccountData) {
 	}
 	fmt.Printf("%s\n", string(j))
 }
-
-// {
-// 	"data": {
-// 	  "type": "accounts",
-// 	  "id": "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc",
-// 	  "organisation_id": "eb0bd6f5-c3f5-44b2-b677-acd23cdde73c",
-// 	  "attributes": {
-// 		"name": ["BETO", "SILESS"],
-// 		"country": "GB",
-// 		"base_currency": "GBP",
-// 		"bank_id": "123456",
-// 		"bank_id_code": "GBDSC",
-// 		"bic": "EXMPLGB2XXX",
-// 		"user_defined_data": [
-// 		  {
-// 			"key": "account_related_key",
-// 			"value": "account_related_value"
-// 		  }
-// 		],
-// 		"validation_type": "card",
-// 		"reference_mask": "############",
-// 		"acceptance_qualifier": "same_day",
-// 		"switched_account_details": {
-// 		  "switched_effective_date": "2022-07-23",
-// 		  "account_number": "12345678",
-// 		  "account_with": {
-// 			"bank_id": "123456",
-// 			"bank_id_code": "GBDSC"
-// 		  },
-// 		  "account_number_code": "BBAN",
-// 		  "account_type": 0
-// 		}
-// 	  }
-// 	}
-//   }
