@@ -12,14 +12,13 @@ import (
 
 // configurations for the account client
 type Config struct {
-	Host    string
-	Port    int
+	BaseUrl string
 	Version string
 }
 
 // AccountClient is a client for the account service.
 type AccountClient struct {
-	Host       string
+	BaseUrl    string
 	Port       int
 	Version    string
 	HttpClient *http.Client
@@ -28,19 +27,14 @@ type AccountClient struct {
 // NewAccountClient creates an AccountClient using a Config struct and returning a pointer to it.
 func NewAccountClient(c *Config) *AccountClient {
 	return &AccountClient{
-		Host:       c.Host,
-		Port:       c.Port,
+		BaseUrl:    c.BaseUrl,
 		Version:    c.Version,
 		HttpClient: &http.Client{},
 	}
 }
 
-func (a *AccountClient) Greet() string {
-	return "Hello! the URL is: " + a.getUrl()
-}
-
-func (a *AccountClient) getUrl() string {
-	return fmt.Sprintf("http://%s:%v/%s/organisation/accounts", a.Host, a.Port, a.Version)
+func (a *AccountClient) GetUrl() string {
+	return fmt.Sprintf("%s/%s/organisation/accounts", a.BaseUrl, a.Version)
 }
 
 func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountData) (*AccountData, error) {
@@ -49,20 +43,54 @@ func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountD
 		return nil, err
 	}
 	data := &AccountData{}
-	return data, a.ExecuteRequest(ctx, http.MethodPost, a.getUrl(), body, data)
+	if err := a.ExecuteRequest(ctx, http.MethodPost, a.GetUrl(), body, data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) error {
-	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.getUrl(), accountId, version), nil, nil)
+	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.GetUrl(), accountId, version), nil, nil)
 }
 
 func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*AccountData, error) {
 	data := &AccountData{}
-	return data, a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.getUrl(), accountId), nil, data)
+	if err := a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.GetUrl(), accountId), nil, data); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte, i interface{}) error {
 
+	req, err := buildRequest(ctx, method, url, body)
+	if err != nil {
+		return err
+	}
+
+	res, err := a.HttpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer res.Body.Close()
+
+	result := &Response{
+		Data: i,
+	}
+
+	err = json.NewDecoder(res.Body).Decode(result)
+	if err != nil && err != io.EOF {
+		return err
+	}
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		return newErrorResponse(res.StatusCode, result.ErrorMessage)
+	}
+	return nil
+}
+
+func buildRequest(ctx context.Context, method, url string, body []byte) (*http.Request, error) {
 	var reader io.Reader
 	if body != nil {
 		reader = bytes.NewReader(body)
@@ -70,7 +98,7 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 
 	req, err := http.NewRequestWithContext(ctx, method, url, reader)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Host = "api.form3.tech"
 	req.Header.Set("Host", "api.form3.tech")
@@ -82,36 +110,7 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 		req.Header.Set("Content-Type", "application/vnd.api+json")
 		req.Header.Set("Content-Length", fmt.Sprint(len(body)))
 	}
-
-	res, err := a.HttpClient.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	result := &Response{
-		Data: i,
-	}
-
-	if len(b) > 0 {
-		err = json.Unmarshal(b, result)
-		if err != nil {
-			return err
-		}
-	}
-
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		return newErrorResponse(res.StatusCode, result.ErrorMessage)
-	}
-	return nil
+	return req, nil
 }
 
 //TODO: Timeouts, Rate Limiting and Retry Strategy
@@ -123,9 +122,13 @@ type ErrorResponse struct {
 }
 
 func newErrorResponse(code int, message *string) *ErrorResponse {
+	var value string
+	if message != nil {
+		value = *message
+	}
 	return &ErrorResponse{
 		Code:    code,
-		Message: *message,
+		Message: value,
 	}
 }
 

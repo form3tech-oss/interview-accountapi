@@ -14,10 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestExecuteRequest(t *testing.T) {
+var account = createAccount()
+var message = "some error!"
 
-	account := createAccount()
-	message := "some error!"
+func TestExecuteRequest(t *testing.T) {
 
 	type testCase struct {
 		name         string
@@ -125,6 +125,8 @@ func TestExecuteRequest(t *testing.T) {
 			defer server.Close()
 
 			ac := &AccountClient{
+				BaseUrl:    server.URL,
+				Version:    "v1",
 				HttpClient: server.Client(),
 			}
 
@@ -136,11 +138,222 @@ func TestExecuteRequest(t *testing.T) {
 			err = ac.ExecuteRequest(tc.context(), http.MethodGet, server.URL, requestBytes, data)
 
 			if tc.err != nil {
+				fmt.Println(err)
 				if uerr := errors.Unwrap(err); uerr != nil {
 					assert.Equal(t, tc.err, uerr)
 				} else {
 					assert.Equal(t, tc.err.Error(), err.Error())
 				}
+			} else {
+				assert.Nil(t, err)
+			}
+
+			if tc.data != nil {
+				assert.Equal(t, tc.data, data)
+			} else {
+				assert.Nil(t, data)
+			}
+		})
+	}
+}
+
+func TestFetchAccount(t *testing.T) {
+
+	type testCase struct {
+		name         string
+		code         int
+		responseBody interface{}
+		expectedUrl  string
+		data         interface{}
+		err          error
+	}
+
+	testCases := []testCase{
+		{
+			name: "request ok",
+			code: 200,
+			responseBody: Response{
+				Data: account,
+			},
+			expectedUrl: "/v1/organisation/accounts/abc123",
+			data:        account,
+			err:         nil,
+		},
+		{
+			name: "account not found",
+			code: 404,
+			responseBody: Response{
+				ErrorMessage: &message,
+			},
+			expectedUrl: "/v1/organisation/accounts/abc123",
+			data:        nil,
+			err:         &ErrorResponse{Code: 404, Message: "some error!"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			responseBytes, err := json.Marshal(tc.responseBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				assert.Equal(t, tc.expectedUrl, req.RequestURI)
+				rw.WriteHeader(tc.code)
+				rw.Write(responseBytes)
+			}))
+			defer server.Close()
+
+			ac := &AccountClient{
+				BaseUrl:    server.URL,
+				Version:    "v1",
+				HttpClient: server.Client(),
+			}
+
+			data, err := ac.FetchAccount(context.Background(), "abc123")
+
+			if tc.err != nil {
+				assert.Equal(t, tc.err.Error(), err.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+
+			if tc.data != nil {
+				assert.Equal(t, tc.data, data)
+			} else {
+				assert.Nil(t, data)
+			}
+		})
+	}
+}
+
+func TestDeleteAccount(t *testing.T) {
+
+	type testCase struct {
+		name         string
+		code         int
+		expectedUrl  string
+		responseBody interface{}
+		err          error
+	}
+
+	testCases := []testCase{
+		{
+			name:         "request ok",
+			code:         200,
+			expectedUrl:  "/v1/organisation/accounts/abc123?version=0",
+			responseBody: nil,
+			err:          nil,
+		},
+		{
+			name:        "account not found",
+			code:        404,
+			expectedUrl: "/v1/organisation/accounts/abc123?version=0",
+			responseBody: Response{
+				ErrorMessage: &message,
+			},
+			err: &ErrorResponse{Code: 404, Message: "some error!"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			responseBytes, err := json.Marshal(tc.responseBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				assert.Equal(t, tc.expectedUrl, req.RequestURI)
+				rw.WriteHeader(tc.code)
+				rw.Write(responseBytes)
+			}))
+			defer server.Close()
+
+			ac := &AccountClient{
+				BaseUrl:    server.URL,
+				Version:    "v1",
+				HttpClient: server.Client(),
+			}
+
+			err = ac.DeleteAccount(context.Background(), "abc123", 0)
+
+			if tc.err != nil {
+				assert.Equal(t, tc.err.Error(), err.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func TestCreateAccount(t *testing.T) {
+
+	type testCase struct {
+		name         string
+		code         int
+		requestBody  interface{}
+		responseBody interface{}
+		expectedUrl  string
+		data         interface{}
+		err          error
+	}
+
+	testCases := []testCase{
+		{
+			name: "request ok",
+			code: 200,
+			requestBody: Request{
+				Data: account,
+			},
+			responseBody: Response{
+				Data: account,
+			},
+			expectedUrl: "/v1/organisation/accounts",
+			data:        account,
+			err:         nil,
+		},
+		{
+			name: "account not found",
+			code: 404,
+			requestBody: Request{
+				Data: account,
+			},
+			responseBody: Response{
+				ErrorMessage: &message,
+			},
+			expectedUrl: "/v1/organisation/accounts",
+			data:        nil,
+			err:         &ErrorResponse{Code: 404, Message: "some error!"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			responseBytes, err := json.Marshal(tc.responseBody)
+			if err != nil {
+				t.Fatal(err)
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				assert.Equal(t, tc.expectedUrl, req.RequestURI)
+				rw.WriteHeader(tc.code)
+				rw.Write(responseBytes)
+			}))
+			defer server.Close()
+
+			ac := &AccountClient{
+				BaseUrl:    server.URL,
+				Version:    "v1",
+				HttpClient: server.Client(),
+			}
+
+			data, err := ac.CreateAccount(context.Background(), account)
+
+			if tc.err != nil {
+				assert.Equal(t, tc.err.Error(), err.Error())
 			} else {
 				assert.Nil(t, err)
 			}
