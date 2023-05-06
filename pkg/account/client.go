@@ -69,7 +69,10 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, url, reader)
-
+	if err != nil {
+		return err
+	}
+	req.Host = "api.form3.tech"
 	req.Header.Set("Host", "api.form3.tech")
 	req.Header.Set("Date", time.Now().Format(time.RFC3339))
 	req.Header.Set("Accept", "vnd.api+json")
@@ -78,10 +81,6 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 	if len(body) > 0 {
 		req.Header.Set("Content-Type", "application/vnd.api+json")
 		req.Header.Set("Content-Length", fmt.Sprint(len(body)))
-	}
-
-	if err != nil {
-		return err
 	}
 
 	res, err := a.HttpClient.Do(req)
