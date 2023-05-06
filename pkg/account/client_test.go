@@ -157,6 +157,53 @@ func TestExecuteRequest(t *testing.T) {
 	}
 }
 
+func TestExecuteRequestFailToMarshal(t *testing.T) {
+
+	type testCase struct {
+		name          string
+		code          int
+		responseBytes []byte
+		err           error
+	}
+
+	testCases := []testCase{
+		{
+			name:          "request ok",
+			code:          200,
+			responseBytes: []byte(`{"key":value}`),
+			err:           fmt.Errorf("invalid character 'v' looking for beginning of value"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+
+				rw.WriteHeader(tc.code)
+				rw.Write(tc.responseBytes)
+			}))
+			defer server.Close()
+
+			ac := &AccountClient{
+				BaseUrl:    server.URL,
+				Version:    "v1",
+				HttpClient: server.Client(),
+			}
+
+			data := &AccountData{}
+
+			err := ac.ExecuteRequest(context.Background(), http.MethodGet, server.URL, nil, data)
+
+			if tc.err != nil {
+				assert.Equal(t, tc.err.Error(), err.Error())
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
 func TestFetchAccount(t *testing.T) {
 
 	type testCase struct {
@@ -367,6 +414,52 @@ func TestCreateAccount(t *testing.T) {
 	}
 }
 
+func TestNewAccountClient(t *testing.T) {
+
+	type testCase struct {
+		name   string
+		cfg    *Config
+		client *AccountClient
+		url    string
+	}
+
+	testCases := []testCase{
+		{
+			name: "create with config",
+			cfg: &Config{
+				BaseUrl: "http://localhost:8080",
+				Version: "v1",
+			},
+			client: &AccountClient{
+				BaseUrl:    "http://localhost:8080",
+				Version:    "v1",
+				HttpClient: &http.Client{},
+			},
+			url: "http://localhost:8080/v1/organisation/accounts",
+		},
+		{
+			name:   "create with nil config",
+			cfg:    nil,
+			client: &AccountClient{HttpClient: &http.Client{}},
+			url:    "http://api.form3.tech/v1/organisation/accounts",
+		},
+		{
+			name:   "create with empty config",
+			cfg:    &Config{},
+			client: &AccountClient{HttpClient: &http.Client{}},
+			url:    "http://api.form3.tech/v1/organisation/accounts",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			client := NewAccountClient(tc.cfg)
+			assert.Equal(t, tc.client, client)
+			assert.Equal(t, tc.url, client.GetUrl())
+		})
+	}
+}
 func createAccount() *AccountData {
 	version := int64(0)
 	country := "GB"

@@ -19,13 +19,16 @@ type Config struct {
 // AccountClient is a client for the account service.
 type AccountClient struct {
 	BaseUrl    string
-	Port       int
 	Version    string
 	HttpClient *http.Client
 }
 
 // NewAccountClient creates an AccountClient using a Config struct and returning a pointer to it.
 func NewAccountClient(c *Config) *AccountClient {
+	if c == nil {
+		return &AccountClient{HttpClient: &http.Client{}}
+	}
+
 	return &AccountClient{
 		BaseUrl:    c.BaseUrl,
 		Version:    c.Version,
@@ -34,7 +37,18 @@ func NewAccountClient(c *Config) *AccountClient {
 }
 
 func (a *AccountClient) GetUrl() string {
-	return fmt.Sprintf("%s/%s/organisation/accounts", a.BaseUrl, a.Version)
+	url := "http://api.form3.tech"
+	version := "v1"
+
+	if len(a.BaseUrl) > 0 {
+		url = a.BaseUrl
+	}
+
+	if len(a.Version) > 0 {
+		version = a.Version
+	}
+
+	return fmt.Sprintf("%s/%s/organisation/accounts", url, version)
 }
 
 func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountData) (*AccountData, error) {

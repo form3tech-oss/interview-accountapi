@@ -1,7 +1,7 @@
 package account
 
 type Request struct {
-	Data *AccountData `json:"data"`
+	Data interface{} `json:"data"`
 }
 
 type Response struct {
