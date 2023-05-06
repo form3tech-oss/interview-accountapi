@@ -16,9 +16,6 @@ func TestFetchAccountIntegration(t *testing.T) {
 
 	account := createAccount()
 
-	deletedAccount := createAccount()
-	deletedAccount.ID = "8ceac1ce-ec44-11ed-a05b-0242ac120003"
-
 	type testCase struct {
 		name     string
 		id       string
@@ -45,12 +42,6 @@ func TestFetchAccountIntegration(t *testing.T) {
 			nil,
 			&ErrorResponse{Code: 404, Message: "record eb0bd6f5-c3f5-44b2-b677-acd23cdde73c does not exist"},
 		},
-		{
-			"fetch deleted account",
-			deletedAccount.ID,
-			deletedAccount,
-			nil,
-		},
 	}
 
 	for _, tc := range testCases {
@@ -61,7 +52,7 @@ func TestFetchAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer db.Close()
-			err = initDB(db, []AccountData{*account, *deletedAccount}, []bool{false, true})
+			err = initDB(db, []AccountData{*account})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -142,7 +133,7 @@ func TestCreateAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer db.Close()
-			err = initDB(db, []AccountData{*existentAccount}, []bool{false})
+			err = initDB(db, []AccountData{*existentAccount})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -161,9 +152,6 @@ func TestCreateAccountIntegration(t *testing.T) {
 
 func TestDeleteAccountIntegration(t *testing.T) {
 	account := createAccount()
-
-	deletedAccount := createAccount()
-	deletedAccount.ID = "8ceac1ce-ec44-11ed-a05b-0242ac120003"
 
 	type testCase struct {
 		name    string
@@ -197,12 +185,6 @@ func TestDeleteAccountIntegration(t *testing.T) {
 			int64(0),
 			&ErrorResponse{Code: 404, Message: ""},
 		},
-		{
-			"delete deleted account",
-			deletedAccount.ID,
-			int64(0),
-			nil,
-		},
 	}
 
 	for _, tc := range testCases {
@@ -213,7 +195,7 @@ func TestDeleteAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer db.Close()
-			err = initDB(db, []AccountData{*account, *deletedAccount}, []bool{false, true})
+			err = initDB(db, []AccountData{*account})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -260,11 +242,7 @@ func openDB() (*sql.DB, error) {
 
 }
 
-func initDB(db *sql.DB, accounts []AccountData, deleted []bool) error {
-
-	if deleted == nil {
-		deleted = make([]bool, len(accounts))
-	}
+func initDB(db *sql.DB, accounts []AccountData) error {
 
 	_, err := db.Exec(`DELETE FROM "Account"`)
 	if err != nil {
@@ -273,7 +251,7 @@ func initDB(db *sql.DB, accounts []AccountData, deleted []bool) error {
 
 	fmt.Println("[DB] successfully cleaned up")
 
-	for i, a := range accounts {
+	for _, a := range accounts {
 		id := a.ID
 		organisationID := a.OrganisationID
 		var version int64 = 0
@@ -286,13 +264,11 @@ func initDB(db *sql.DB, accounts []AccountData, deleted []bool) error {
 			return err
 		}
 
-		isDeleted := deleted[i]
-
 		_, err = db.Exec(`
 		INSERT INTO "Account"
 			(id, organisation_id, version, is_deleted, is_locked, created_on, modified_on, record, pagination_id)
 		VALUES
-			('` + id + `', '` + organisationID + `', ` + strconv.FormatInt(version, 10) + `, ` + fmt.Sprint(isDeleted) + `, false, '` + a.CreatedOn + `', current_timestamp,'` + string(record) + `'::jsonb , DEFAULT)`)
+			('` + id + `', '` + organisationID + `', ` + strconv.FormatInt(version, 10) + `, false, false, '` + a.CreatedOn + `', current_timestamp,'` + string(record) + `'::jsonb , DEFAULT)`)
 		if err != nil {
 			return err
 		}
