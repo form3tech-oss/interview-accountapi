@@ -29,9 +29,8 @@ func (lr *LimitRateAndRetry) maxRetries() int {
 func (lr *LimitRateAndRetry) wait() int {
 	if lr == nil || lr.Wait == nil {
 		return 500
-	} else {
-		return *lr.Wait
 	}
+	return *lr.Wait
 }
 
 func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Request) (*http.Response, error) {
