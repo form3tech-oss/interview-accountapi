@@ -1,9 +1,14 @@
 package account
 
 import (
+	"bytes"
+	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -133,12 +138,145 @@ func TestExponentialBackOff(t *testing.T) {
 	}
 }
 
+func TestExponentialBackOffWithTimeOut(t *testing.T) {
+
+	type testCase struct {
+		name    string
+		service *mockService
+		timeout time.Duration
+		cancel  bool
+		calls   int
+		status  int
+		err     error
+	}
+
+	testCases := []testCase{
+		{
+			"succeed before context time out",
+			&mockService{
+				responses: []*http.Response{
+					{StatusCode: 429},
+					{StatusCode: 500},
+					{StatusCode: 200},
+				},
+				requests:      []*http.Request{},
+				expectedBytes: 5,
+			},
+			500,
+			false,
+			3,
+			200,
+			nil,
+		},
+		{
+			"context time out",
+			&mockService{
+				responses: []*http.Response{
+					{StatusCode: 429},
+					{StatusCode: 500},
+					{StatusCode: 500},
+					{StatusCode: 500},
+					{StatusCode: 200},
+				},
+				requests:      []*http.Request{},
+				expectedBytes: 5,
+			},
+			100,
+			false,
+			2,
+			0,
+			context.DeadlineExceeded,
+		},
+		{
+			"exceed max retries",
+			&mockService{
+				responses: []*http.Response{
+					{StatusCode: 429},
+					{StatusCode: 500},
+					{StatusCode: 500},
+					{StatusCode: 500},
+					{StatusCode: 200},
+				},
+				requests:      []*http.Request{},
+				expectedBytes: 5,
+			},
+			1000,
+			false,
+			4,
+			0,
+			fmt.Errorf("[exponential back-off] Max retries (3) exceeded"),
+		},
+		{
+			"context cancelled",
+			&mockService{
+				responses: []*http.Response{
+					{StatusCode: 429},
+					{StatusCode: 500},
+					{StatusCode: 200},
+				},
+				requests:      []*http.Request{},
+				expectedBytes: 5,
+			},
+			100,
+			true,
+			1,
+			0,
+			fmt.Errorf("context canceled"),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			req := &http.Request{
+				Method: http.MethodGet,
+				Body:   ioutil.NopCloser(bytes.NewReader([]byte("HELLO"))),
+				GetBody: func() (io.ReadCloser, error) {
+					return ioutil.NopCloser(bytes.NewReader([]byte("HELLO"))), nil
+				},
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), tc.timeout*time.Millisecond)
+			if tc.cancel {
+				cancel()
+			} else {
+				defer cancel()
+			}
+			req = req.WithContext(ctx)
+			wait := 50
+			maxRetries := 3
+
+			lr := &LimitRateAndRetry{
+				MaxRetries: &maxRetries,
+				Wait:       &wait,
+			}
+
+			res, err := lr.ExponentialBackOff(tc.service, req)
+			assert.Equal(t, tc.err, err)
+			assert.Equal(t, tc.calls, len(tc.service.requests))
+			if err == nil {
+				assert.Equal(t, tc.status, res.StatusCode)
+			}
+		})
+	}
+}
+
 type mockService struct {
-	responses []*http.Response
-	requests  []*http.Request
+	responses     []*http.Response
+	requests      []*http.Request
+	expectedBytes int
 }
 
 func (m *mockService) Do(req *http.Request) (*http.Response, error) {
+	if m.expectedBytes > 0 {
+		if b, err := io.ReadAll(req.Body); err != nil {
+			return nil, err
+		} else {
+			if len(b) != m.expectedBytes {
+				return nil, fmt.Errorf("expected %d bytes, got %d", m.expectedBytes, len(b))
+			}
+		}
+	}
 
 	m.requests = append(m.requests, req)
 	if len(m.responses) > 0 {

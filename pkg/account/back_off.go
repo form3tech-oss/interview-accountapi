@@ -40,9 +40,9 @@ func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Reque
 	var body []byte
 	if req.Body != nil {
 		if b, err := io.ReadAll(req.Body); err != nil {
-			body = b
-		} else {
 			return nil, err
+		} else {
+			body = b
 		}
 	}
 
@@ -50,7 +50,13 @@ func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Reque
 
 		if retry {
 			time.Sleep(time.Duration(WaitForRetry(retries, wait)) * time.Millisecond)
-			req = req.Clone(req.Context())
+			ctx := req.Context()
+			if ctx != nil {
+				if err := ctx.Err(); err != nil {
+					return nil, err
+				}
+			}
+			req = req.Clone(ctx)
 		}
 
 		if body != nil {
