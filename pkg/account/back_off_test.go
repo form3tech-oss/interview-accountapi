@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -230,9 +229,9 @@ func TestExponentialBackOffWithTimeOut(t *testing.T) {
 
 			req := &http.Request{
 				Method: http.MethodGet,
-				Body:   ioutil.NopCloser(bytes.NewReader([]byte("HELLO"))),
+				Body:   io.NopCloser(bytes.NewReader([]byte("HELLO"))),
 				GetBody: func() (io.ReadCloser, error) {
-					return ioutil.NopCloser(bytes.NewReader([]byte("HELLO"))), nil
+					return io.NopCloser(bytes.NewReader([]byte("HELLO"))), nil
 				},
 			}
 

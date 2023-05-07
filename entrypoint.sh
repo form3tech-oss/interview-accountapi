@@ -3,4 +3,4 @@ export TEST_CONTEXT="container"
 
 echo $TEST_CONTEXT
 
-go test -v ./...
+go test -v ./... -cover
