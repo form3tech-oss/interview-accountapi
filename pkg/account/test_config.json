@@ -1,0 +1,26 @@
+{
+    "local" : {
+        "api": {
+            "baseUrl": "http://localhost:8080"
+        },
+        "database": {
+            "host" : "localhost",
+            "port" : "5432",
+            "user" : "interview_accountapi_user",
+            "password" : "123",
+            "dbname" : "interview_accountapi"
+        }
+    },
+    "container" : {
+        "api": {
+            "baseUrl": "http://accountapi:8080"
+        },
+        "database": {
+            "host" : "postgresql",
+            "port" : "5432",
+            "user" : "interview_accountapi_user",
+            "password" : "123",
+            "dbname" : "interview_accountapi"
+        }
+    }
+}

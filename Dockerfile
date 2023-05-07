@@ -6,5 +6,4 @@ COPY . .
 
 RUN go build -v ./...
 
-CMD ["go", "test", "-v", "./..."]
-
+ENTRYPOINT ["sh", "/go/src/app/entrypoint.sh"]

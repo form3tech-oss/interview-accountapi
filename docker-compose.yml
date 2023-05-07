@@ -43,3 +43,9 @@ services:
     environment:
       - SKIP_SETCAP=1
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
+
+
+  integration_tests:
+    build: .
+    depends_on:
+      - accountapi

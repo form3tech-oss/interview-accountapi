@@ -5,12 +5,22 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"testing"
 
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
+
+var testConfig = ReadConfig(os.Getenv("TEST_CONTEXT"))
+
+var baseUrl = testConfig["api"]["baseUrl"]
+var host = testConfig["database"]["host"]
+var port = testConfig["database"]["port"]
+var user = testConfig["database"]["user"]
+var password = testConfig["database"]["password"]
+var dbname = testConfig["database"]["dbname"]
 
 func TestFetchAccountIntegration(t *testing.T) {
 
@@ -57,7 +67,7 @@ func TestFetchAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			accountClient := NewAccountClient(&Config{BaseUrl: "http://localhost:8080", Version: "v1"})
+			accountClient := NewAccountClient(&Config{BaseUrl: baseUrl, Version: "v1"})
 			accountData, err := accountClient.FetchAccount(context.Background(), tc.id)
 			assert.Equal(t, tc.err, err)
 			assert.Equal(t, tc.expected, accountData)
@@ -138,7 +148,7 @@ func TestCreateAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			accountClient := NewAccountClient(&Config{BaseUrl: "http://localhost:8080", Version: "v1"})
+			accountClient := NewAccountClient(&Config{BaseUrl: baseUrl, Version: "v1"})
 			accountData, err := accountClient.CreateAccount(context.Background(), tc.account)
 			assert.Equal(t, tc.err, err)
 
@@ -200,7 +210,7 @@ func TestDeleteAccountIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			accountClient := NewAccountClient(&Config{BaseUrl: "http://localhost:8080", Version: "v1"})
+			accountClient := NewAccountClient(&Config{BaseUrl: baseUrl, Version: "v1"})
 			err = accountClient.DeleteAccount(context.Background(), tc.id, tc.version)
 			assert.Equal(t, tc.err, err)
 
@@ -215,15 +225,8 @@ func TestDeleteAccountIntegration(t *testing.T) {
 }
 
 func openDB() (*sql.DB, error) {
-	const (
-		host     = "localhost"
-		port     = 5432
-		user     = "interview_accountapi_user"
-		password = "123"
-		dbname   = "interview_accountapi"
-	)
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	fmt.Printf("[DB] connecting to %s\n", psqlInfo)
 
@@ -276,4 +279,42 @@ func initDB(db *sql.DB, accounts []AccountData) error {
 	fmt.Println("[DB] successfully initialized")
 
 	return nil
+}
+
+func TestReadTestConfig(t *testing.T) {
+
+	m := ReadConfig("default")
+	assert.Equal(t, m["api"]["baseUrl"], "http://localhost:8080")
+	assert.Equal(t, m["database"]["host"], "localhost")
+	assert.Equal(t, m["database"]["port"], "5432")
+	assert.Equal(t, m["database"]["user"], "interview_accountapi_user")
+	assert.Equal(t, m["database"]["password"], "123")
+	assert.Equal(t, m["database"]["dbname"], "interview_accountapi")
+
+	m = ReadConfig("container")
+	assert.Equal(t, m["api"]["baseUrl"], "http://accountapi:8080")
+	assert.Equal(t, m["database"]["host"], "postgresql")
+	assert.Equal(t, m["database"]["port"], "5432")
+	assert.Equal(t, m["database"]["user"], "interview_accountapi_user")
+	assert.Equal(t, m["database"]["password"], "123")
+	assert.Equal(t, m["database"]["dbname"], "interview_accountapi")
+}
+
+func ReadConfig(env string) map[string]map[string]string {
+
+	b, err := os.ReadFile("test_config.json")
+	if err != nil {
+		panic(err)
+	}
+	x := map[string]map[string]map[string]string{}
+	err = json.Unmarshal(b, &x)
+	if err != nil {
+		panic(err)
+	}
+
+	if config, ok := x[env]; !ok {
+		return x["local"]
+	} else {
+		return config
+	}
 }
