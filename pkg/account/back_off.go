@@ -1,7 +1,9 @@
 package account
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"time"
@@ -13,7 +15,7 @@ type Service interface {
 
 type LimitRateAndRetry struct {
 	MaxRetries *int
-	Interval   *int
+	Wait       *int
 }
 
 func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Request) (*http.Response, error) {
@@ -24,23 +26,38 @@ func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Reque
 
 	retries := 0
 	retry := false
-	interval := 500
+	wait := 500
 	maxRetries := 3
 
-	if lr.Interval != nil {
-		interval = *lr.Interval
+	if lr.Wait != nil {
+		wait = *lr.Wait
 	}
 
 	if lr.MaxRetries != nil {
 		maxRetries = *lr.MaxRetries
 	}
 
+	var body []byte
+	if req.Body != nil {
+		if b, err := io.ReadAll(req.Body); err != nil {
+			body = b
+		} else {
+			return nil, err
+		}
+	}
+
 	for ok := true; ok; ok = (retry && (retries <= maxRetries)) {
 
 		if retry {
-			timeInterval := time.Duration(interval) * time.Millisecond
-			exp := math.Pow(float64(1.5), float64(retries))
-			time.Sleep(time.Duration(exp) * timeInterval)
+			time.Sleep(time.Duration(WaitForRetry(retries, wait)) * time.Millisecond)
+			req = req.Clone(req.Context())
+		}
+
+		if body != nil {
+			req.Body = io.NopCloser(bytes.NewReader(body))
+			req.GetBody = func() (io.ReadCloser, error) {
+				return io.NopCloser(bytes.NewReader(body)), nil
+			}
 		}
 
 		res, err := service.Do(req)
@@ -59,4 +76,12 @@ func (lr *LimitRateAndRetry) ExponentialBackOff(service Service, req *http.Reque
 	}
 
 	return nil, fmt.Errorf("[exponential back-off] Max retries (%d) exceeded", maxRetries)
+}
+
+func WaitForRetry(retries, wait int) float64 {
+	if retries == 0 {
+		return 0
+	}
+	exp := math.Pow(float64(1.5), float64(retries))
+	return exp * float64(wait)
 }

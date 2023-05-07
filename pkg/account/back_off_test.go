@@ -120,7 +120,7 @@ func TestExponentialBackOff(t *testing.T) {
 
 			lr := &LimitRateAndRetry{
 				MaxRetries: &maxRetries,
-				Interval:   &wait,
+				Wait:       &wait,
 			}
 
 			res, err := lr.ExponentialBackOff(tc.service, req)
@@ -147,4 +147,43 @@ func (m *mockService) Do(req *http.Request) (*http.Response, error) {
 		return res, nil
 	}
 	return nil, fmt.Errorf("unexpected error")
+}
+
+func TestNextInterval(t *testing.T) {
+
+	type testCase struct {
+		name     string
+		index    int
+		expected []float64
+	}
+
+	testCases := []testCase{
+		{
+			"empty",
+			0,
+			[]float64{0},
+		},
+		{
+			"fout retries",
+			4,
+			[]float64{
+				0,
+				1.5,
+				2.25,
+				3.375,
+				5.0625,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+
+			result := []float64{}
+			for i := 0; i <= tc.index; i++ {
+				result = append(result, WaitForRetry(i, 1))
+			}
+			assert.Equal(t, tc.expected, result)
+		})
+	}
 }

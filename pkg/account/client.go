@@ -15,6 +15,7 @@ type Config struct {
 	BaseUrl    string
 	Version    string
 	MaxRetries int
+	Wait       int
 }
 
 // AccountClient is a client for the account service.
@@ -38,6 +39,7 @@ func NewAccountClient(c *Config) *AccountClient {
 		HttpClient: httpClient,
 		LimitRateAndRetry: &LimitRateAndRetry{
 			MaxRetries: &c.MaxRetries,
+			Wait:       &c.Wait,
 		},
 	}
 }
@@ -132,9 +134,6 @@ func buildRequest(ctx context.Context, method, url string, body []byte) (*http.R
 	}
 	return req, nil
 }
-
-//TODO: Timeouts, Rate Limiting and Retry Strategy
-//Should a request to the Form3 API respond with a status code indicating a temporary error (429, 500, 503 or 504, see above) or no response is received at all, wait and retry the request using an exponential back-off algorithm. See the code panel on the right for a simple example implementation in pseudo code.
 
 type ErrorResponse struct {
 	Code    int

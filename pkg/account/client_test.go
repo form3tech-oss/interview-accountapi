@@ -424,7 +424,9 @@ func TestNewAccountClient(t *testing.T) {
 	}
 
 	maxRetries := 2
-	zeroRetries := 0
+	zero := 0
+	wait := 500
+
 	testCases := []testCase{
 		{
 			name: "create with config",
@@ -432,12 +434,13 @@ func TestNewAccountClient(t *testing.T) {
 				BaseUrl:    "http://localhost:8080",
 				Version:    "v1",
 				MaxRetries: maxRetries,
+				Wait:       wait,
 			},
 			client: &AccountClient{
 				BaseUrl:           "http://localhost:8080",
 				Version:           "v1",
 				HttpClient:        &http.Client{},
-				LimitRateAndRetry: &LimitRateAndRetry{MaxRetries: &maxRetries},
+				LimitRateAndRetry: &LimitRateAndRetry{MaxRetries: &maxRetries, Wait: &wait},
 			},
 			url: "http://localhost:8080/v1/organisation/accounts",
 		},
@@ -450,7 +453,7 @@ func TestNewAccountClient(t *testing.T) {
 		{
 			name:   "create with empty config",
 			cfg:    &Config{},
-			client: &AccountClient{HttpClient: &http.Client{}, LimitRateAndRetry: &LimitRateAndRetry{MaxRetries: &zeroRetries}},
+			client: &AccountClient{HttpClient: &http.Client{}, LimitRateAndRetry: &LimitRateAndRetry{MaxRetries: &zero, Wait: &zero}},
 			url:    "http://api.form3.tech/v1/organisation/accounts",
 		},
 	}
