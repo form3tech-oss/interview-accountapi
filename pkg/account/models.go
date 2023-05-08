@@ -1,9 +1,11 @@
 package account
 
+// Request and Response are the types used to communicate with the API.
 type Request struct {
 	Data interface{} `json:"data"`
 }
 
+// Request and Response are the types used to communicate with the API.
 type Response struct {
 	Data         interface{} `json:"data"`
 	ErrorMessage *string     `json:"error_message"`

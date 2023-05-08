@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// configurations for the account client
+// configuration to create an AccountClient
 type Config struct {
 	BaseUrl    string
 	Version    string
@@ -18,7 +18,11 @@ type Config struct {
 	Wait       int
 }
 
-// AccountClient is a client for the account service.
+// AccountClient is a client for the organization/account API.
+// BaseUrl the base URL for the API calls.
+// Version the version of the API to use.
+// HttpClient the http client to use for the API calls.
+// LimitRateAndRetry the implementation for the retry / exponential backoff strategy.
 type AccountClient struct {
 	BaseUrl           string
 	Version           string
@@ -26,7 +30,11 @@ type AccountClient struct {
 	LimitRateAndRetry *LimitRateAndRetry
 }
 
-// NewAccountClient creates an AccountClient using a Config struct and returning a pointer to it.
+// NewAccountClient Constructor. Creates an AccountClient with the Config struct and returning a pointer to it.
+// baseURL defaults to http://api.form3.tech
+// version defaults to v1
+// httpClient defaults to http.Client{}
+// LimitRateAndRetry defaults to LimitRateAndRetry{MaxRetries: 3, Wait: 500}
 func NewAccountClient(c *Config) *AccountClient {
 	if c == nil {
 		return &AccountClient{HttpClient: &http.Client{}, LimitRateAndRetry: &LimitRateAndRetry{}}
@@ -44,6 +52,8 @@ func NewAccountClient(c *Config) *AccountClient {
 	}
 }
 
+// Returns the base URL for the API calls.
+// Defaults to http://api.form3.tech/v1/organisation/accounts
 func (a *AccountClient) GetUrl() string {
 	url := "http://api.form3.tech"
 	version := "v1"
@@ -59,6 +69,9 @@ func (a *AccountClient) GetUrl() string {
 	return fmt.Sprintf("%s/%s/organisation/accounts", url, version)
 }
 
+// Creates a new account using the AccountData struct and returns a pointer to the created account.
+// This same context will be used for any retry, allowing cancel, timeout, and error handling.
+// Return error if the account already exists or if any validation fails for the input data.
 func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountData) (*AccountData, error) {
 	body, err := json.Marshal(Request{Data: accountData})
 	if err != nil {
@@ -71,10 +84,16 @@ func (a *AccountClient) CreateAccount(ctx context.Context, accountData *AccountD
 	return data, nil
 }
 
+// Delete an existing account with the account ID and version.
+// This same context will be used for any retry, allowing cancel, timeout, and error handling.
+// Returns error if the account is not found.
 func (a *AccountClient) DeleteAccount(ctx context.Context, accountId string, version int64) error {
 	return a.ExecuteRequest(ctx, http.MethodDelete, fmt.Sprintf("%s/%s?version=%d", a.GetUrl(), accountId, version), nil, nil)
 }
 
+// Fetch an existing account with the account ID.
+// This same context will be used for any retry, allowing cancel, timeout, and error handling.
+// Returns error if the account is not found.
 func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*AccountData, error) {
 	data := &AccountData{}
 	if err := a.ExecuteRequest(ctx, http.MethodGet, fmt.Sprintf("%s/%s", a.GetUrl(), accountId), nil, data); err != nil {
@@ -83,13 +102,18 @@ func (a *AccountClient) FetchAccount(ctx context.Context, accountId string) (*Ac
 	return data, nil
 }
 
+// Function to execute the request and handle the response.
+// Returns error if the request fails or if the response status code is not 2xx / 3xx.
+// The response body is decoded into the given interface.
 func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, body []byte, i interface{}) error {
 
+	// build request with the given context
 	req, err := buildRequest(ctx, method, url, body)
 	if err != nil {
 		return err
 	}
 
+	// the request execution is delegated to the LimitRateAndRetry implementation.
 	res, err := a.LimitRateAndRetry.ExponentialBackOff(a.HttpClient, req)
 	if err != nil {
 		return err
@@ -106,12 +130,14 @@ func (a *AccountClient) ExecuteRequest(ctx context.Context, method, url string, 
 		return err
 	}
 
+	// read the body and return an error if the status code is not 2xx /3xx
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return newErrorResponse(res.StatusCode, result.ErrorMessage)
 	}
 	return nil
 }
 
+// Function to build the request with the given context and the necessary headers.
 func buildRequest(ctx context.Context, method, url string, body []byte) (*http.Request, error) {
 	var reader io.Reader
 	if body != nil {
@@ -135,11 +161,13 @@ func buildRequest(ctx context.Context, method, url string, body []byte) (*http.R
 	return req, nil
 }
 
+// Struct to hold error responses from the API.
 type ErrorResponse struct {
 	Code    int
 	Message string
 }
 
+// ErrorResponse constructor.
 func newErrorResponse(code int, message *string) *ErrorResponse {
 	var value string
 	if message != nil {
@@ -151,6 +179,7 @@ func newErrorResponse(code int, message *string) *ErrorResponse {
 	}
 }
 
+// Error function to implement the error interface.
 func (er ErrorResponse) Error() string {
 	return fmt.Sprintf("error: (%d) message: %s", er.Code, er.Message)
 }
