@@ -152,6 +152,8 @@ I started with the db approach to have more end to end control. In the end just 
 
 As stated above, a simple configuration was added to the integration test to use a local configurations for development or other options for CI/CD etc.
 
+Last, I've tried to add some simple stress tests here to get a 429 and assert some info about the retry and back off strategy, but could not stress the server without getting first a 500 error caused by postgres amount of connections before reaching any throttling error.
+
 ## external dependencies
 The client was implemented using only the golang standard library. The dependencies at the `go.mod` are exclusive for test cases: testify and pq.
 ```
