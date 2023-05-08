@@ -48,13 +48,9 @@ func main() {
 	if err == nil {
 		printAccount(res)
 	} else if errors.As(err, &errorResponse) {
-		fmt.Printf("ESTA OK code => %d\n", errorResponse.Code)
-		fmt.Printf("ESTA OK message => %s\n", errorResponse.Message)
-		fmt.Printf("ESTA OK err => %v", err)
-		fmt.Printf("ESTA OK errorResponse => %v", errorResponse)
-
+		fmt.Println(err)
 	} else {
-		fmt.Println("ESTA MAL: %w", err)
+		fmt.Println(err)
 	}
 	res, err = client.FetchAccount(ctx, "ad27e265-9605-4b4b-a0e5-3003ea9cc4dc")
 	if err != nil {
